@@ -1,0 +1,66 @@
+// ── Activa el tema oscuro de PrimeNG ──────────────────────
+// Agrega la clase 'dark-mode' al <html> para activar el dark theme
+html {
+  font-size: 16px;
+}
+
+// Aplica dark mode globalmente al cargar
+html.dark-mode {
+  color-scheme: dark;
+}
+
+// ── Reset básico ───────────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #0a0d0f;
+  color: #eef1f3;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ── PrimeNG global tweaks ──────────────────────────────────
+
+// Inputs: borde y fondo alineados al diseño dark
+.p-inputtext {
+  background: #181d21 !important;
+  border-color: #1e252b !important;
+  color: #eef1f3 !important;
+  border-radius: 8px !important;
+
+  &:focus {
+    border-color: #2dbd7a !important;
+    box-shadow: 0 0 0 3px rgba(45, 189, 122, 0.15) !important;
+  }
+
+  &.ng-invalid.ng-dirty {
+    border-color: var(--p-red-400) !important;
+    box-shadow: 0 0 0 3px rgba(240, 84, 84, 0.1) !important;
+  }
+
+  &::placeholder {
+    color: #3a4a58 !important;
+  }
+}
+
+// Toast: fondo oscuro
+.p-toast {
+  .p-toast-message {
+    border-radius: 10px !important;
+    backdrop-filter: blur(8px);
+  }
+}
+
+// Scrollbar personalizado
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0d0f; }
+::-webkit-scrollbar-thumb {
+  background: #1e252b;
+  border-radius: 3px;
+  &:hover { background: #2dbd7a44; }
+}

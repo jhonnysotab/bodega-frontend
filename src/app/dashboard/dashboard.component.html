@@ -1,0 +1,187 @@
+<div class="dashboard">
+
+  <!-- ── ENCABEZADO ──────────────────────────────────────── -->
+  <div class="dash-header">
+    <div>
+      <h2>Resumen del día</h2>
+      <p>{{ today }}</p>
+    </div>
+    <p-button
+      label="Nueva venta"
+      icon="pi pi-plus"
+      styleClass="btn-nueva-venta"
+      routerLink="/ventas/nueva"
+    />
+  </div>
+
+  <!-- ── TARJETAS KPI ─────────────────────────────────────── -->
+  <div class="kpi-grid">
+
+    <!-- Ventas del día -->
+    <div class="kpi-card kpi-ventas" [class.loading]="loadingStats">
+      <div class="kpi-icon">
+        <i class="pi pi-receipt"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Ventas hoy</span>
+        <span class="kpi-value">S/ {{ totalVentasHoy | number:'1.2-2' }}</span>
+        <span class="kpi-sub">
+          <i class="pi pi-shopping-cart"></i>
+          {{ cantidadVentasHoy }} transacciones
+        </span>
+      </div>
+      <div class="kpi-trend up">
+        <i class="pi pi-arrow-up-right"></i>
+      </div>
+    </div>
+
+    <!-- Stock bajo -->
+    <div class="kpi-card kpi-stock" [class.loading]="loadingStats">
+      <div class="kpi-icon warning">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Stock bajo</span>
+        <span class="kpi-value">{{ productosStockBajo }}</span>
+        <span class="kpi-sub">
+          <i class="pi pi-box"></i>
+          productos por reabastecer
+        </span>
+      </div>
+      <div class="kpi-trend" [class.warn]="productosStockBajo > 0">
+        <i class="pi pi-arrow-right"></i>
+      </div>
+    </div>
+
+    <!-- Ingresos del mes -->
+    <div class="kpi-card kpi-mes" [class.loading]="loadingStats">
+      <div class="kpi-icon success">
+        <i class="pi pi-chart-line"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Ingresos del mes</span>
+        <span class="kpi-value">S/ {{ totalMes | number:'1.2-2' }}</span>
+        <span class="kpi-sub">
+          <i class="pi pi-calendar"></i>
+          {{ mesActual }}
+        </span>
+      </div>
+      <div class="kpi-trend up">
+        <i class="pi pi-arrow-up-right"></i>
+      </div>
+    </div>
+
+    <!-- Total productos -->
+    <div class="kpi-card kpi-productos" [class.loading]="loadingStats">
+      <div class="kpi-icon info">
+        <i class="pi pi-box"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Total productos</span>
+        <span class="kpi-value">{{ totalProductos }}</span>
+        <span class="kpi-sub">
+          <i class="pi pi-check-circle"></i>
+          {{ productosActivos }} activos
+        </span>
+      </div>
+      <div class="kpi-trend neutral">
+        <i class="pi pi-minus"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CONTENIDO PRINCIPAL ─────────────────────────────── -->
+  <div class="dash-body">
+
+    <!-- Gráfico de ventas por día -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <h3>Ventas por día</h3>
+          <span>Últimos 7 días</span>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot accent"></span>
+          <span>Ventas (S/)</span>
+        </div>
+      </div>
+      <div class="chart-wrapper" *ngIf="!loadingChart">
+        <p-chart
+          type="bar"
+          [data]="chartData"
+          [options]="chartOptions"
+          height="280px"
+        />
+      </div>
+      <div class="chart-skeleton" *ngIf="loadingChart">
+        <div class="skeleton-bar" *ngFor="let b of [1,2,3,4,5,6,7]" [style.height.%]="b * 12"></div>
+      </div>
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="side-panel">
+
+      <!-- Últimas ventas -->
+      <div class="panel-card">
+        <div class="card-header">
+          <h3>Últimas ventas</h3>
+          <a routerLink="/ventas" class="ver-todo">Ver todo <i class="pi pi-arrow-right"></i></a>
+        </div>
+        <div class="ventas-list" *ngIf="!loadingVentas">
+          <div class="venta-item" *ngFor="let v of ultimasVentas">
+            <div class="venta-icon">
+              <i class="pi" [class]="getTipoPagoIcon(v.tipoPago)"></i>
+            </div>
+            <div class="venta-info">
+              <span class="venta-num">{{ v.numeroVenta }}</span>
+              <span class="venta-time">{{ v.fechaVenta | date:'HH:mm' }}</span>
+            </div>
+            <span class="venta-monto">S/ {{ v.total | number:'1.2-2' }}</span>
+          </div>
+          <div class="empty-state" *ngIf="ultimasVentas.length === 0">
+            <i class="pi pi-inbox"></i>
+            <span>Sin ventas hoy</span>
+          </div>
+        </div>
+        <div class="list-skeleton" *ngIf="loadingVentas">
+          <div class="skel-row" *ngFor="let i of [1,2,3,4]"></div>
+        </div>
+      </div>
+
+      <!-- Productos con stock bajo -->
+      <div class="panel-card">
+        <div class="card-header">
+          <h3>Stock bajo</h3>
+          <a routerLink="/productos" class="ver-todo">Ver todo <i class="pi pi-arrow-right"></i></a>
+        </div>
+        <div class="stock-list" *ngIf="!loadingStock">
+          <div class="stock-item" *ngFor="let p of productosConStockBajo">
+            <div class="stock-nombre">{{ p.nombre }}</div>
+            <div class="stock-bar-wrap">
+              <div class="stock-bar">
+                <div
+                  class="stock-bar-fill"
+                  [style.width.%]="getStockPct(p.stock, p.stockMinimo)"
+                  [class.critical]="p.stock === 0"
+                ></div>
+              </div>
+              <span class="stock-num" [class.zero]="p.stock === 0">
+                {{ p.stock }} / {{ p.stockMinimo }}
+              </span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="productosConStockBajo.length === 0">
+            <i class="pi pi-check-circle"></i>
+            <span>Stock en buen nivel</span>
+          </div>
+        </div>
+        <div class="list-skeleton" *ngIf="loadingStock">
+          <div class="skel-row" *ngFor="let i of [1,2,3]"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

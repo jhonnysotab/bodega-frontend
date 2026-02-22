@@ -1,0 +1,144 @@
+<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <i class="pi pi-shopping-cart"></i>
+      </div>
+      <span class="logo-text">BodegaPOS</span>
+    </div>
+
+    <!-- Toggle collapse -->
+    <button class="collapse-btn" (click)="toggleSidebar()" pRipple>
+      <i class="pi" [class.pi-chevron-left]="!sidebarCollapsed" [class.pi-chevron-right]="sidebarCollapsed"></i>
+    </button>
+
+    <!-- Navegación -->
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <span class="nav-section-label">Principal</span>
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" pRipple>
+          <i class="pi pi-home"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/ventas" routerLinkActive="active" pRipple>
+          <i class="pi pi-receipt"></i>
+          <span>Ventas</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section-label">Catálogo</span>
+        <a class="nav-item" routerLink="/productos" routerLinkActive="active" pRipple>
+          <i class="pi pi-box"></i>
+          <span>Productos</span>
+        </a>
+        <a class="nav-item" routerLink="/categorias" routerLinkActive="active" pRipple>
+          <i class="pi pi-tags"></i>
+          <span>Categorías</span>
+        </a>
+        <a class="nav-item" routerLink="/proveedores" routerLinkActive="active" pRipple>
+          <i class="pi pi-truck"></i>
+          <span>Proveedores</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section-label">Finanzas</span>
+        <a class="nav-item" routerLink="/gastos" routerLinkActive="active" pRipple>
+          <i class="pi pi-wallet"></i>
+          <span>Gastos</span>
+        </a>
+        <a class="nav-item" routerLink="/movimientos" routerLinkActive="active" pRipple>
+          <i class="pi pi-arrow-right-arrow-left"></i>
+          <span>Movimientos</span>
+        </a>
+      </div>
+
+      <!-- Solo ADMIN -->
+      <div class="nav-section" *ngIf="isAdmin">
+        <span class="nav-section-label">Administración</span>
+        <a class="nav-item" routerLink="/usuarios" routerLinkActive="active" pRipple>
+          <i class="pi pi-users"></i>
+          <span>Usuarios</span>
+        </a>
+        <a class="nav-item" routerLink="/empresas" routerLinkActive="active" pRipple>
+          <i class="pi pi-building"></i>
+          <span>Empresas</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Footer del sidebar -->
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <p-avatar
+          [label]="userInitial"
+          styleClass="user-avatar"
+          shape="circle"
+        />
+        <div class="user-details">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">{{ userRol }}</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── CONTENIDO PRINCIPAL ──────────────────────────── -->
+  <div class="main-area">
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <!-- Botón hamburguesa en móvil -->
+        <button class="mobile-menu-btn" (click)="toggleMobileSidebar()" pRipple>
+          <i class="pi pi-bars"></i>
+        </button>
+        <div class="page-title">
+          <h1>{{ pageTitle }}</h1>
+          <span class="breadcrumb">BodegaPOS / {{ pageTitle }}</span>
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <!-- Notificaciones stock bajo -->
+        <button class="nav-btn" pRipple pTooltip="Stock bajo" tooltipPosition="bottom">
+          <i class="pi pi-bell"></i>
+          <span class="badge" *ngIf="stockBajoCount > 0">{{ stockBajoCount }}</span>
+        </button>
+
+        <!-- Perfil -->
+        <button class="nav-btn profile-btn" (click)="menu.toggle($event)" pRipple>
+          <p-avatar
+            [label]="userInitial"
+            styleClass="nav-avatar"
+            shape="circle"
+          />
+          <span class="profile-name">{{ userName }}</span>
+          <i class="pi pi-chevron-down"></i>
+        </button>
+
+        <p-menu #menu [model]="profileMenu" [popup]="true" styleClass="profile-menu" />
+      </div>
+    </header>
+
+    <!-- Overlay móvil -->
+    <div
+      class="mobile-overlay"
+      [class.visible]="mobileSidebarOpen"
+      (click)="toggleMobileSidebar()"
+    ></div>
+
+    <!-- Router outlet -->
+    <main class="page-content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

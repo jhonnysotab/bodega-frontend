@@ -1,12 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, Renderer2 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  template: `<router-outlet />`
 })
-export class App {
-  protected readonly title = signal('bodega-frontend');
+export class AppComponent implements OnInit {
+  constructor(private renderer: Renderer2) {}
+
+  ngOnInit(): void {
+    this.renderer.addClass(document.documentElement, 'dark-mode');
+  }
 }

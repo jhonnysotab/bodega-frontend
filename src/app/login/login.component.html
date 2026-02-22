@@ -1,0 +1,151 @@
+<div class="login-wrapper">
+
+  <!-- Panel izquierdo: branding -->
+  <div class="brand-panel">
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        <div class="logo-icon">
+          <i class="pi pi-shopping-cart"></i>
+        </div>
+        <span class="logo-text">BodegaPOS</span>
+      </div>
+
+      <div class="brand-tagline">
+        <h1>Controla tu<br/><span class="accent">negocio.</span><br/>Vende más.</h1>
+        <p>Sistema de punto de venta diseñado para bodegas modernas.</p>
+      </div>
+
+      <div class="brand-stats">
+        <div class="stat">
+          <span class="stat-number">+500</span>
+          <span class="stat-label">Bodegas activas</span>
+        </div>
+        <p-divider layout="vertical" />
+        <div class="stat">
+          <span class="stat-number">99.9%</span>
+          <span class="stat-label">Disponibilidad</span>
+        </div>
+        <p-divider layout="vertical" />
+        <div class="stat">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">Soporte</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Decoración -->
+    <div class="brand-decoration">
+      <div class="deco-circle deco-1"></div>
+      <div class="deco-circle deco-2"></div>
+      <div class="deco-grid"></div>
+    </div>
+  </div>
+
+  <!-- Panel derecho: formulario -->
+  <div class="form-panel">
+    <div class="form-container">
+
+      <!-- Logo mobile -->
+      <div class="mobile-logo">
+        <div class="logo-icon-sm">
+          <i class="pi pi-shopping-cart"></i>
+        </div>
+        <span>BodegaPOS</span>
+      </div>
+
+      <div class="form-header">
+        <h2>Bienvenido</h2>
+        <p>Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <!-- Toast para errores -->
+      <p-toast position="top-center" key="login-toast" />
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Username -->
+        <div class="field-group">
+          <label for="username">Usuario</label>
+          <p-iconfield class="w-full">
+            <p-inputicon styleClass="pi pi-user" />
+            <input
+              pInputText
+              id="username"
+              formControlName="username"
+              placeholder="Tu nombre de usuario"
+              autocomplete="username"
+              class="w-full"
+              [class.ng-invalid]="hasError('username')"
+              [class.ng-dirty]="hasError('username')"
+            />
+          </p-iconfield>
+          <small class="p-error" *ngIf="hasError('username')">
+            <i class="pi pi-exclamation-circle"></i>
+            El usuario es obligatorio
+          </small>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label for="password">Contraseña</label>
+          <p-iconfield class="w-full">
+            <p-inputicon styleClass="pi pi-lock" />
+            <input
+              pInputText
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Tu contraseña"
+              autocomplete="current-password"
+              class="w-full input-password"
+              [class.ng-invalid]="hasError('password')"
+              [class.ng-dirty]="hasError('password')"
+            />
+          </p-iconfield>
+          <!-- Toggle password separado -->
+          <button
+            type="button"
+            class="toggle-eye"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+          </button>
+          <small class="p-error" *ngIf="hasError('password')">
+            <i class="pi pi-exclamation-circle"></i>
+            La contraseña es obligatoria
+          </small>
+        </div>
+
+        <!-- Error servidor -->
+        <p-message
+          *ngIf="serverError"
+          severity="error"
+          [text]="serverError"
+          styleClass="w-full server-msg"
+        />
+
+        <!-- Botón submit -->
+        <p-button
+          type="submit"
+          label="Ingresar al sistema"
+          icon="pi pi-sign-in"
+          iconPos="right"
+          styleClass="w-full btn-login"
+          [loading]="isLoading"
+          [disabled]="isLoading"
+        />
+
+      </form>
+
+      <p class="footer-note">
+        ¿Problemas para ingresar?
+        <span>Contacta a tu administrador.</span>
+      </p>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,385 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+// ── Variables propias (complementan el tema de PrimeNG) ────
+:host {
+  --brand-accent:     #2dbd7a;
+  --brand-accent-dim: rgba(45, 189, 122, 0.15);
+  --brand-dark:       #22a066;
+  --bg-base:          #0a0d0f;
+  --bg-panel:         #0d1419;
+  --border-subtle:    #1a2028;
+  --text-primary:     #eef1f3;
+  --text-secondary:   #7a8a96;
+  --text-muted:       #3a4a58;
+  --font-display:     'Syne', sans-serif;
+  --font-body:        'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+// ── Wrapper principal ──────────────────────────────────────
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-base);
+  font-family: var(--font-body);
+}
+
+// ── PANEL IZQUIERDO ────────────────────────────────────────
+.brand-panel {
+  position: relative;
+  flex: 0 0 48%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, #0d1419 0%, #0a1612 60%, #091210 100%);
+  border-right: 1px solid var(--border-subtle);
+
+  @media (max-width: 900px) { display: none; }
+}
+
+.brand-content {
+  position: relative;
+  z-index: 2;
+  padding: 3rem;
+  max-width: 440px;
+  width: 100%;
+}
+
+// Logo
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 3.5rem;
+}
+
+.logo-icon {
+  width: 46px;
+  height: 46px;
+  background: var(--brand-accent-dim);
+  border: 1px solid rgba(45, 189, 122, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .pi {
+    font-size: 1.3rem;
+    color: var(--brand-accent);
+  }
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+// Tagline
+.brand-tagline {
+  margin-bottom: 3rem;
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 3.2vw, 2.9rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+    margin-bottom: 1rem;
+
+    .accent {
+      color: var(--brand-accent);
+    }
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+}
+
+// Stats
+.brand-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.35rem; 
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+
+  // Overrides del Divider de PrimeNG
+  ::ng-deep .p-divider.p-divider-vertical {
+    margin: 0;
+    padding: 0;
+    min-width: 1px;
+    width: 1px;
+    height: 36px;
+    background: var(--border-subtle);
+    border: none;
+
+    &::before { display: none; }
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--brand-accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}
+
+// Decoraciones
+.brand-decoration {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.deco-1 {
+  width: 520px; height: 520px;
+  top: -160px; right: -200px;
+  background: radial-gradient(circle, rgba(45, 189, 122, 0.05) 0%, transparent 65%);
+  border: 1px solid rgba(45, 189, 122, 0.05);
+}
+
+.deco-2 {
+  width: 280px; height: 280px;
+  bottom: 60px; left: -100px;
+  background: radial-gradient(circle, rgba(45, 189, 122, 0.04) 0%, transparent 65%);
+  border: 1px solid rgba(45, 189, 122, 0.06);
+}
+
+.deco-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(45, 189, 122, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 189, 122, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 70% 40%, black 10%, transparent 70%);
+}
+
+// ── PANEL DERECHO ──────────────────────────────────────────
+.form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// Logo mobile
+.mobile-logo {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+
+  @media (max-width: 900px) { display: flex; }
+
+  .logo-icon-sm {
+    width: 36px;
+    height: 36px;
+    background: var(--brand-accent-dim);
+    border: 1px solid rgba(45, 189, 122, 0.25);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .pi { font-size: 1rem; color: var(--brand-accent); }
+  }
+}
+
+// Header
+.form-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+}
+
+// ── Campos ─────────────────────────────────────────────────
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .p-error {
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    .pi { font-size: 0.75rem; }
+  }
+}
+
+// Override PrimeNG InputText
+::ng-deep {
+  .p-inputtext {
+    font-family: var(--font-body) !important;
+    font-size: 0.95rem !important;
+    font-weight: 400 !important;
+    padding-left: 2.75rem !important;
+   padding-right: 10rem !important;
+    &.input-password {
+      padding-right: 10rem !important;
+    }
+  }
+
+  // IconField wrapper
+  .p-iconfield {
+    width: 100%;
+  }
+
+  // Message de error del servidor
+  .server-msg {
+    margin-bottom: 1rem;
+    border-radius: 8px !important;
+
+    .p-message-text {
+      font-family: var(--font-body) !important;
+      font-size: 0.875rem !important;
+    }
+  }
+
+  // Botón principal — override con color de marca
+  .btn-login.p-button {
+    margin-top: 0.5rem;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    background: var(--brand-accent) !important;
+    border-color: var(--brand-accent) !important;
+    color: #051a0e !important;
+    border-radius: 8px !important;
+    padding: 0.85rem 1.5rem !important;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s !important;
+
+    &:hover:not(:disabled) {
+      background: var(--brand-dark) !important;
+      border-color: var(--brand-dark) !important;
+      box-shadow: 0 8px 24px rgba(45, 189, 122, 0.28) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) !important;
+    }
+
+    &:disabled {
+      opacity: 0.65 !important;
+    }
+  }
+}
+
+// Toggle ojo contraseña (posicionado sobre el input)
+.toggle-eye {
+  position: absolute;
+  right: 12px;
+  top: 36px; // label height + gap
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: color 0.2s;
+  z-index: 10;
+
+  .pi { font-size: 1rem; }
+  &:hover { color: var(--text-secondary); }
+}
+
+// Footer
+.footer-note {
+  margin-top: 1.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+
+  span {
+    color: var(--text-secondary);
+    margin-left: 4px;
+  }
+}
+
+// ── Responsive móvil ───────────────────────────────────────
+@media (max-width: 480px) {
+  .form-panel { padding: 1.5rem 1.25rem; }
+  .form-header h2 { font-size: 1.6rem; }
+
+  // Evita zoom automático en iOS
+  ::ng-deep .p-inputtext { font-size: 16px !important; }
+}
