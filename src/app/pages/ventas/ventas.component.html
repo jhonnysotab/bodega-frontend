@@ -1,0 +1,73 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Ventas</h2>
+      <p>Historial de ventas del día</p>
+    </div>
+ 
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Ventas hoy</span>
+      <span class="kpi-mini-value">{{ ventasHoy.length }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Total del día</span>
+      <span class="kpi-mini-value accent">S/ {{ totalDia | number:'1.2-2' }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Ticket promedio</span>
+      <span class="kpi-mini-value">S/ {{ ticketPromedio | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <p-table [value]="ventasHoy" [loading]="loading" [paginator]="true" [rows]="10" dataKey="id" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>N° Venta</th>
+          <th>Fecha/Hora</th>
+          <th>Tipo pago</th>
+          <th style="text-align:right">Total</th>
+          <th style="text-align:right">Recibido</th>
+          <th style="text-align:right">Vuelto</th>
+          <th>Nota</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-v>
+        <tr>
+          <td><span class="num-venta">{{ v.numeroVenta }}</span></td>
+          <td><span class="fecha">{{ v.fechaVenta | date:'dd/MM/yyyy HH:mm' }}</span></td>
+          <td>
+            <div class="pago-badge">
+              <i class="pi" [class]="getPagoIcon(v.tipoPago)"></i>
+              {{ v.tipoPago }}
+            </div>
+          </td>
+          <td style="text-align:right"><span class="monto">S/ {{ v.total | number:'1.2-2' }}</span></td>
+          <td style="text-align:right"><span class="monto-sec">S/ {{ v.montoRecibido | number:'1.2-2' }}</span></td>
+          <td style="text-align:right">
+            <span class="vuelto-txt" *ngIf="v.vuelto > 0">S/ {{ v.vuelto | number:'1.2-2' }}</span>
+            <span class="no-vuelto"  *ngIf="!v.vuelto || v.vuelto === 0">—</span>
+          </td>
+          <td><span class="nota">{{ v.nota || '—' }}</span></td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="pi pi-receipt"></i>
+              <span>Sin ventas hoy. ¡Registra la primera!</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>

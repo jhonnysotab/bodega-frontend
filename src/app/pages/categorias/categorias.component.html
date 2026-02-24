@@ -1,0 +1,172 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Categorías</h2>
+      <p>Organiza tus productos por categorías</p>
+    </div>
+    <p-button
+      label="Nueva categoría"
+      icon="pi pi-plus"
+      styleClass="btn-primary"
+      (onClick)="abrirDialogCrear()"
+    />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="categorias"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5,10,25]"
+      [globalFilterFields]="['nombre','descripcion']"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+      #dt
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar categoría..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+          <th>Descripción</th>
+          <th>Productos</th>
+          <th>Estado</th>
+          <th style="width:120px; text-align:center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-c>
+        <tr>
+          <td>
+            <div class="cat-cell">
+              <div class="cat-icon" [style.background]="getColorBg(c.id)">
+                <i class="pi pi-tag" [style.color]="getColor(c.id)"></i>
+              </div>
+              <span class="cat-nombre">{{ c.nombre }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="descripcion">{{ c.descripcion || '—' }}</span>
+          </td>
+          <td>
+            <span class="count-badge">
+              <i class="pi pi-box"></i>
+              {{ c.totalProductos ?? 0 }}
+            </span>
+          </td>
+          <td>
+            <p-tag
+              [value]="c.activo ? 'Activa' : 'Inactiva'"
+              [severity]="c.activo ? 'success' : 'danger'"
+            />
+          </td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="btn-action edit"
+                pTooltip="Editar"
+                tooltipPosition="top"
+                (onClick)="abrirDialogEditar(c)"
+              />
+              <p-button
+                [icon]="c.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                styleClass="btn-action toggle"
+                [pTooltip]="c.activo ? 'Desactivar' : 'Activar'"
+                tooltipPosition="top"
+                (onClick)="toggleEstado(c)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                styleClass="btn-action delete"
+                pTooltip="Eliminar"
+                tooltipPosition="top"
+                (onClick)="confirmarEliminar(c)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5">
+            <div class="empty-state">
+              <i class="pi pi-tags"></i>
+              <span>No hay categorías registradas</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── DIALOG ────────────────────────────────────────────── -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="editMode ? 'Editar categoría' : 'Nueva categoría'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="cat-dialog"
+  [style]="{ width: '440px' }"
+>
+  <form [formGroup]="categoriaForm" (ngSubmit)="guardar()" novalidate>
+
+    <div class="field-group">
+      <label>Nombre</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-tag" />
+        <input pInputText formControlName="nombre" placeholder="Ej: Bebidas" class="w-full"
+          [class.ng-invalid]="hasError('nombre')" [class.ng-dirty]="hasError('nombre')" />
+      </p-iconfield>
+      <small class="p-error" *ngIf="hasError('nombre')">El nombre es obligatorio</small>
+    </div>
+
+    <div class="field-group">
+      <label>Descripción <span class="optional">(opcional)</span></label>
+      <textarea
+        pInputText
+        formControlName="descripcion"
+        placeholder="Describe esta categoría..."
+        rows="3"
+        class="w-full textarea-field"
+      ></textarea>
+    </div>
+
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" styleClass="btn-cancel" (onClick)="cerrarDialog()" />
+    <p-button
+      [label]="editMode ? 'Guardar cambios' : 'Crear categoría'"
+      icon="pi pi-check"
+      styleClass="btn-primary"
+      [loading]="saving"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog styleClass="confirm-dialog" />
+<p-toast position="top-right" />

@@ -1,0 +1,237 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Empresas</h2>
+      <p>Gestión de empresas registradas en el sistema</p>
+    </div>
+    <p-button
+      label="Nueva empresa"
+      icon="pi pi-plus"
+      styleClass="btn-primary"
+      (onClick)="abrirDialogCrear()"
+    />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="empresas"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5,10,25]"
+      [globalFilterFields]="['nombre','ruc','plan']"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+      #dt
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar empresa..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="nombre">Empresa <p-sortIcon field="nombre" /></th>
+          <th pSortableColumn="ruc">RUC <p-sortIcon field="ruc" /></th>
+          <th pSortableColumn="plan">Plan <p-sortIcon field="plan" /></th>
+          <th>Vencimiento</th>
+          <th>Estado plan</th>
+          <th>Estado</th>
+          <th style="width:120px; text-align:center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-e>
+        <tr>
+          <td>
+            <div class="empresa-cell">
+              <div class="empresa-icon">
+                <i class="pi pi-building"></i>
+              </div>
+              <div>
+                <span class="empresa-nombre">{{ e.nombre }}</span>
+                <span class="empresa-tel">{{ e.telefono }}</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ruc-badge">{{ e.ruc }}</span></td>
+          <td>
+            <p-tag
+              [value]="e.plan || 'Sin plan'"
+              [severity]="getPlanSeverity(e.plan)"
+            />
+          </td>
+          <td>
+            <span class="fecha-cell" [class.vencido]="isVencido(e.fechaVencimiento)">
+              <i class="pi pi-calendar"></i>
+              {{ e.fechaVencimiento ? (e.fechaVencimiento | date:'dd/MM/yyyy') : '—' }}
+            </span>
+          </td>
+          <td>
+            <p-tag
+              [value]="e.estadoPlan"
+              [severity]="getEstadoPlanSeverity(e.estadoPlan)"
+            />
+          </td>
+          <td>
+            <p-tag
+              [value]="e.activo ? 'Activa' : 'Inactiva'"
+              [severity]="e.activo ? 'success' : 'danger'"
+            />
+          </td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="btn-action edit"
+                pTooltip="Editar"
+                tooltipPosition="top"
+                (onClick)="abrirDialogEditar(e)"
+              />
+              <p-button
+                [icon]="e.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                styleClass="btn-action toggle"
+                [pTooltip]="e.activo ? 'Desactivar' : 'Activar'"
+                tooltipPosition="top"
+                (onClick)="toggleEstado(e)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="pi pi-building"></i>
+              <span>No hay empresas registradas</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── DIALOG CREAR / EDITAR ─────────────────────────────── -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="editMode ? 'Editar empresa' : 'Nueva empresa'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="empresa-dialog"
+  [style]="{ width: '520px' }"
+>
+  <form [formGroup]="empresaForm" (ngSubmit)="guardar()" novalidate>
+
+    <!-- Nombre -->
+    <div class="field-group">
+      <label>Nombre de la empresa</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-building" />
+        <input pInputText formControlName="nombre" placeholder="Ej: Bodega San Martín" class="w-full"
+          [class.ng-invalid]="hasError('nombre')" [class.ng-dirty]="hasError('nombre')" />
+      </p-iconfield>
+      <small class="p-error" *ngIf="hasError('nombre')">El nombre es obligatorio</small>
+    </div>
+
+    <!-- RUC -->
+    <div class="field-group">
+      <label>RUC</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-id-card" />
+        <input pInputText formControlName="ruc" placeholder="Ej: 20123456789" class="w-full" maxlength="11"
+          [class.ng-invalid]="hasError('ruc')" [class.ng-dirty]="hasError('ruc')" />
+      </p-iconfield>
+      <small class="p-error" *ngIf="hasError('ruc')">RUC debe tener 11 dígitos</small>
+    </div>
+
+    <!-- Teléfono -->
+    <div class="field-group">
+      <label>Teléfono</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-phone" />
+        <input pInputText formControlName="telefono" placeholder="Ej: 987654321" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    <!-- Dirección -->
+    <div class="field-group">
+      <label>Dirección</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-map-marker" />
+        <input pInputText formControlName="direccion" placeholder="Ej: Av. Lima 123" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    <!-- Plan + Fechas en grid -->
+    <div class="form-grid">
+      <div class="field-group">
+        <label>Plan</label>
+        <p-select
+          formControlName="plan"
+          [options]="planes"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccionar plan"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="field-group">
+        <label>Fecha inicio</label>
+        <p-datepicker
+          formControlName="fechaInicio"
+          dateFormat="dd/mm/yy"
+          placeholder="dd/mm/aaaa"
+          styleClass="w-full"
+          [showIcon]="true"
+        />
+      </div>
+
+      <div class="field-group">
+        <label>Fecha vencimiento</label>
+        <p-datepicker
+          formControlName="fechaVencimiento"
+          dateFormat="dd/mm/yy"
+          placeholder="dd/mm/aaaa"
+          styleClass="w-full"
+          [showIcon]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Error servidor -->
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" styleClass="btn-cancel" (onClick)="cerrarDialog()" />
+    <p-button
+      [label]="editMode ? 'Guardar cambios' : 'Crear empresa'"
+      icon="pi pi-check"
+      styleClass="btn-primary"
+      [loading]="saving"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog styleClass="confirm-dialog" />
+<p-toast position="top-right" />

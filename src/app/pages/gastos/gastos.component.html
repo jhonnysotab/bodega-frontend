@@ -1,0 +1,225 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Gastos</h2>
+      <p>Control de egresos del negocio</p>
+    </div>
+    <p-button label="Nuevo gasto" icon="pi pi-plus" styleClass="btn-primary" (onClick)="abrirDrawer()" />
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Gastos hoy</span>
+      <span class="kpi-mini-value">{{ gastosHoy.length }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Total hoy</span>
+      <span class="kpi-mini-value warn">S/ {{ totalHoy | number:'1.2-2' }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-mini">
+      <span class="kpi-mini-label">Total del mes</span>
+      <span class="kpi-mini-value">S/ {{ totalMes | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Filtros por categoría -->
+  <div class="filter-chips-row">
+    <button class="chip" [class.active]="filtroCategoria === null" (click)="filtrarCategoria(null)">Todos</button>
+    <button class="chip" *ngFor="let c of categorias"
+      [class.active]="filtroCategoria === c.id"
+      (click)="filtrarCategoria(c.id)">
+      {{ c.nombre }}
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="gastosFiltrados"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [globalFilterFields]="['descripcion','nota']"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+      #dt
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input pInputText type="text" placeholder="Buscar gasto..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')" />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="fecha">Fecha <p-sortIcon field="fecha"/></th>
+          <th pSortableColumn="descripcion">Descripción <p-sortIcon field="descripcion"/></th>
+          <th>Categoría</th>
+          <th>Proveedor</th>
+          <th>Nota</th>
+          <th pSortableColumn="monto" style="text-align:right">Monto <p-sortIcon field="monto"/></th>
+          <th style="width:80px; text-align:center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-g>
+        <tr>
+          <td><span class="fecha-cell">{{ g.fecha | date:'dd/MM/yyyy' }}</span></td>
+          <td>
+            <div class="desc-cell">
+              <div class="desc-icon" [style.background]="getCatColor(g.categoriaId).bg">
+                <i class="pi pi-receipt" [style.color]="getCatColor(g.categoriaId).fg"></i>
+              </div>
+              <span class="desc-text">{{ g.descripcion }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="cat-chip" *ngIf="g.categoriaNombre">{{ g.categoriaNombre }}</span>
+            <span class="sin-cat" *ngIf="!g.categoriaNombre">—</span>
+          </td>
+          <td><span class="prov-text">{{ g.proveedorNombre || '—' }}</span></td>
+          <td><span class="nota-text">{{ g.nota || '—' }}</span></td>
+          <td style="text-align:right">
+            <span class="monto-gasto">S/ {{ g.monto | number:'1.2-2' }}</span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <p-button icon="pi pi-pencil" styleClass="btn-action edit"
+                pTooltip="Editar" tooltipPosition="top" (onClick)="abrirEditar(g)" />
+              <p-button icon="pi pi-trash" styleClass="btn-action delete"
+                pTooltip="Eliminar" tooltipPosition="top" (onClick)="confirmarEliminar(g)" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <i class="pi pi-wallet"></i>
+            <span>Sin gastos registrados</span>
+          </div>
+        </td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- ══ DRAWER RÁPIDO ════════════════════════════════════ -->
+<div class="drawer-overlay" [class.open]="drawerVisible" (click)="cerrarDrawer()"></div>
+
+<div class="drawer-panel" [class.open]="drawerVisible">
+
+  <div class="dp-header">
+    <div class="dp-title">
+      <i class="pi pi-wallet"></i>
+      {{ editMode ? 'Editar gasto' : 'Nuevo gasto' }}
+    </div>
+    <button class="dp-close" (click)="cerrarDrawer()"><i class="pi pi-times"></i></button>
+  </div>
+
+  <div class="dp-body" [formGroup]="gastoForm">
+
+    <!-- MONTO - protagonista -->
+    <div class="monto-hero">
+      <label>Monto del gasto</label>
+      <div class="monto-input" [class.has-focus]="montoFocus" [class.is-error]="hasError('monto')">
+        <span class="currency">S/</span>
+        <input
+          type="number" formControlName="monto" placeholder="0.00"
+          step="0.01" min="0"
+          (focus)="montoFocus=true" (blur)="montoFocus=false"
+        />
+      </div>
+      <small class="field-error" *ngIf="hasError('monto')">Ingresa un monto válido</small>
+    </div>
+
+    <!-- Descripción -->
+    <div class="field-group">
+      <label>Descripción</label>
+      <div class="input-icon-wrap" [class.is-error]="hasError('descripcion')">
+        <i class="pi pi-pencil"></i>
+        <input type="text" formControlName="descripcion" placeholder="Ej: Compra de insumos, pago de luz..." />
+      </div>
+      <small class="field-error" *ngIf="hasError('descripcion')">La descripción es obligatoria</small>
+    </div>
+
+    <!-- Categoría -->
+    <div class="field-group">
+      <label>Categoría de gasto</label>
+      <p-select
+        formControlName="categoriaId"
+        [options]="categorias"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="¿En qué se gastó?"
+        styleClass="w-full"
+        [showClear]="true"
+      />
+    </div>
+
+    <!-- Proveedor -->
+    <div class="field-group">
+      <label>Proveedor <span class="opt">opcional</span></label>
+      <p-select
+        formControlName="proveedorId"
+        [options]="proveedores"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="¿A quién se le pagó?"
+        styleClass="w-full"
+        [showClear]="true"
+        [filter]="true"
+        filterPlaceholder="Buscar..."
+      />
+    </div>
+
+    <!-- Fecha -->
+    <div class="field-group">
+      <label>Fecha</label>
+      <p-datepicker
+        formControlName="fecha"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+        styleClass="w-full"
+        placeholder="Hoy por defecto"
+      />
+    </div>
+
+    <!-- Nota -->
+    <div class="field-group">
+      <label>Nota / Comprobante <span class="opt">opcional</span></label>
+      <div class="input-icon-wrap">
+        <i class="pi pi-file-edit"></i>
+        <input type="text" formControlName="nota" placeholder="Ej: Factura #001, boleta..." />
+      </div>
+    </div>
+
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </div>
+
+  <div class="dp-footer">
+    <button class="foot-btn cancel" (click)="cerrarDrawer()">Cancelar</button>
+    <button class="foot-btn primary" [disabled]="saving" (click)="guardar()">
+      <i class="pi"
+        [class.pi-spin]="saving" [class.pi-spinner]="saving"
+        [class.pi-check]="!saving && !editMode"
+        [class.pi-save]="!saving && editMode"></i>
+      {{ saving ? 'Guardando...' : editMode ? 'Guardar cambios' : 'Registrar gasto' }}
+    </button>
+  </div>
+
+</div>
+
+<p-confirmDialog styleClass="confirm-dialog" />
+<p-toast position="top-right" />

@@ -1,0 +1,293 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Productos</h2>
+      <p>Gestión de productos e inventario</p>
+    </div>
+    <p-button
+      label="Nuevo producto"
+      icon="pi pi-plus"
+      styleClass="btn-primary"
+      (onClick)="abrirDialogCrear()"
+    />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="productos"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5,10,25]"
+      [globalFilterFields]="['nombre','descripcion','categoria.nombre']"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+      #dt
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <!-- Filtro activo -->
+          <div class="filter-chips">
+            <button
+              class="chip"
+              [class.active]="filtroActivo === 'todos'"
+              (click)="filtrar('todos')"
+            >Todos</button>
+            <button
+              class="chip"
+              [class.active]="filtroActivo === 'stock_bajo'"
+              (click)="filtrar('stock_bajo')"
+            >
+              <i class="pi pi-exclamation-triangle"></i>
+              Stock bajo
+              <span class="chip-count" *ngIf="countStockBajo > 0">{{ countStockBajo }}</span>
+            </button>
+            <button
+              class="chip"
+              [class.active]="filtroActivo === 'inactivos'"
+              (click)="filtrar('inactivos')"
+            >Inactivos</button>
+          </div>
+
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar producto..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="nombre">Producto <p-sortIcon field="nombre" /></th>
+          <th pSortableColumn="categoria.nombre">Categoría <p-sortIcon field="categoria.nombre" /></th>
+          <th pSortableColumn="precio" style="text-align:right">precio compra <p-sortIcon field="precio" /></th>
+          <th pSortableColumn="precio" style="text-align:right">precio venta <p-sortIcon field="precio" /></th>
+          <th pSortableColumn="stock" style="text-align:center">Stock <p-sortIcon field="stock" /></th>
+          <th>Estado</th>
+          <th style="width:120px; text-align:center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <!-- Producto -->
+          <td>
+            <div class="prod-cell">
+              <div class="prod-icon" [style.background]="getCatColorBg(p.categoriaId)">
+                <i class="pi pi-box" [style.color]="getCatColor(p.categoriaId)"></i>
+              </div>
+              <div>
+                <span class="prod-nombre">{{ p.nombre }}</span>
+                <!-- <span class="prod-desc">{{ p.descripcion || '—' }}</span> -->
+              </div>
+            </div>
+          </td>
+
+          <!-- Categoría -->
+          <td>
+            <span class="cat-badge" *ngIf="p.categoriaNombre">
+              <i class="pi pi-tag"></i>
+              {{ p.categoriaNombre }}
+            </span>
+            <span class="sin-cat" *ngIf="!p.categoriaNombre">Sin categoría</span>
+          </td>
+
+          <!-- Precio -->
+          <td style="text-align:right">
+            <span class="precio compra">S/ {{ p.precioCompra | number:'1.2-2' }}</span>
+          </td>
+
+          <td style="text-align:right">
+            <span class="precio venta">S/ {{ p.precioVenta | number:'1.2-2' }}</span>
+          </td>
+
+          <!-- Stock -->
+          <td style="text-align:center">
+            <span
+              class="stock-badge"
+              [class.ok]="p.stock > (p.stockMinimo ?? 0)"
+              [class.low]="p.stock > 0 && p.stock <= (p.stockMinimo ?? 0)"
+              [class.zero]="p.stock === 0"
+            >
+              <i class="pi"
+                [class.pi-check-circle]="p.stock > (p.stockMinimo ?? 0)"
+                [class.pi-exclamation-triangle]="p.stock > 0 && p.stock <= (p.stockMinimo ?? 0)"
+                [class.pi-times-circle]="p.stock === 0"
+              ></i>
+              {{ p.stock }}
+            </span>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <p-tag
+              [value]="p.activo ? 'Activo' : 'Inactivo'"
+              [severity]="p.activo ? 'success' : 'danger'"
+            />
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="btn-action edit"
+                pTooltip="Editar"
+                tooltipPosition="top"
+                (onClick)="abrirDialogEditar(p)"
+              />
+              <p-button
+                [icon]="p.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                styleClass="btn-action toggle"
+                [pTooltip]="p.activo ? 'Desactivar' : 'Activar'"
+                tooltipPosition="top"
+                (onClick)="toggleEstado(p)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                styleClass="btn-action delete"
+                pTooltip="Eliminar"
+                tooltipPosition="top"
+                (onClick)="confirmarEliminar(p)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="pi pi-box"></i>
+              <span>No hay productos registrados</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── DIALOG CREAR / EDITAR ─────────────────────────────── -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="editMode ? 'Editar producto' : 'Nuevo producto'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="prod-dialog"
+  [style]="{ width: '480px' }"
+>
+  <form [formGroup]="productoForm" (ngSubmit)="guardar()" novalidate>
+
+    <!-- Nombre -->
+    <div class="field-group">
+      <label>Nombre</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-box" />
+        <input pInputText formControlName="nombre" placeholder="Ej: Coca Cola 500ml" class="w-full"
+          [class.ng-invalid]="hasError('nombre')" [class.ng-dirty]="hasError('nombre')" />
+      </p-iconfield>
+      <small class="p-error" *ngIf="hasError('nombre')">El nombre es obligatorio</small>
+    </div>
+
+    <!-- Descripción -->
+    <!-- <div class="field-group">
+      <label>Descripción <span class="optional">(opcional)</span></label>
+      <textarea
+        pInputText
+        formControlName="descripcion"
+        placeholder="Describe el producto..."
+        rows="2"
+        class="w-full textarea-field"
+      ></textarea>
+    </div> -->
+
+    <!-- Precio + Stock en grid -->
+    <div class="form-grid-2">
+      <div class="field-group">
+        <label>Precio Compra (S/)</label>
+        <p-iconfield class="w-full">
+          <p-inputicon styleClass="pi pi-dollar" />
+          <input pInputText type="number" formControlName="precioCompra"
+            placeholder="0.00" step="0.01" min="0" class="w-full"
+            [class.ng-invalid]="hasError('precioCompra')" [class.ng-dirty]="hasError('precioCompra')" />
+        </p-iconfield>
+        <small class="p-error" *ngIf="hasError('precioCompra')">Ingresa un precio válido</small>
+      </div>
+
+    <div class="field-group">
+        <label>Precio Venta (S/)</label>
+        <p-iconfield class="w-full">
+          <p-inputicon styleClass="pi pi-dollar" />
+          <input pInputText type="number" formControlName="precioVenta"
+            placeholder="0.00" step="0.01" min="0" class="w-full"
+            [class.ng-invalid]="hasError('precioVenta')" [class.ng-dirty]="hasError('precioVenta')" />
+        </p-iconfield>
+        <small class="p-error" *ngIf="hasError('precioVenta')">Ingresa un precio válido</small>
+    </div>
+
+      <div class="field-group">
+        <label>Stock inicial</label>
+        <p-iconfield class="w-full">
+          <p-inputicon styleClass="pi pi-hashtag" />
+          <input pInputText type="number" formControlName="stock"
+            placeholder="0" min="0" class="w-full"
+            [class.ng-invalid]="hasError('stock')" [class.ng-dirty]="hasError('stock')" />
+        </p-iconfield>
+        <small class="p-error" *ngIf="hasError('stock')">Ingresa un stock válido</small>
+      </div>
+    </div>
+
+    <!-- Stock mínimo -->
+    <div class="field-group">
+      <label>Stock mínimo <span class="optional">(alerta cuando baje de este valor)</span></label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-exclamation-triangle" />
+        <input pInputText type="number" formControlName="stockMinimo"
+          placeholder="Ej: 5" min="0" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    <!-- Categoría -->
+    <div class="field-group">
+      <label>Categoría <span class="optional">(opcional)</span></label>
+      <p-select
+        formControlName="categoriaId"
+        [options]="categorias"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Seleccionar categoría"
+        styleClass="w-full"
+        [showClear]="true"
+      />
+    </div>
+
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" styleClass="btn-cancel" (onClick)="cerrarDialog()" />
+    <p-button
+      [label]="editMode ? 'Guardar cambios' : 'Crear producto'"
+      icon="pi pi-check"
+      styleClass="btn-primary"
+      [loading]="saving"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog styleClass="confirm-dialog" />
+<p-toast position="top-right" />

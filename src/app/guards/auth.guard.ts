@@ -1,36 +1,23 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../service/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router      = inject(Router);
 
-  const router = inject(Router);
+  if (authService.isLoggedIn()) return true;
 
-  const token = localStorage.getItem('token');
+  router.navigate(['/login']);
+  return false;
+};
 
-  // ❌ No hay token
-  if (!token) {
-    router.navigate(['/login']);
-    return false;
-  }
+export const adminGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router      = inject(Router);
 
-  // ✅ Validar expiración (simple)
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+  if (authService.isAdmin()) return true;
 
-    const exp = payload.exp;
-    const now = Math.floor(Date.now() / 1000);
-
-    if (exp < now) {
-      localStorage.removeItem('token');
-      router.navigate(['/login']);
-      return false;
-    }
-
-  } catch (e) {
-    localStorage.removeItem('token');
-    router.navigate(['/login']);
-    return false;
-  }
-
-  return true;
+  router.navigate(['/dashboard']);
+  return false;
 };

@@ -2,100 +2,65 @@
 
   <!-- ── SIDEBAR ─────────────────────────────────────── -->
   <aside class="sidebar">
-
-    <!-- Logo -->
     <div class="sidebar-logo">
-      <div class="logo-icon">
-        <i class="pi pi-shopping-cart"></i>
-      </div>
+      <div class="logo-icon"><i class="pi pi-shopping-cart"></i></div>
       <span class="logo-text">BodegaPOS</span>
     </div>
 
-    <!-- Toggle collapse -->
     <button class="collapse-btn" (click)="toggleSidebar()" pRipple>
       <i class="pi" [class.pi-chevron-left]="!sidebarCollapsed" [class.pi-chevron-right]="sidebarCollapsed"></i>
     </button>
 
-    <!-- Navegación -->
+    <!-- ✅ BOTÓN NUEVA VENTA en sidebar -->
+    <div class="nueva-venta-wrap">
+      <button class="nueva-venta-btn" (click)="abrirNuevaVenta()" pRipple>
+        <i class="pi pi-plus-circle"></i>
+        <span class="nueva-venta-label">Nueva Venta</span>
+      </button>
+    </div>
+
     <nav class="sidebar-nav">
       <div class="nav-section">
         <span class="nav-section-label">Principal</span>
-        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" pRipple>
-          <i class="pi pi-home"></i>
-          <span>Dashboard</span>
-        </a>
-        <a class="nav-item" routerLink="/ventas" routerLinkActive="active" pRipple>
-          <i class="pi pi-receipt"></i>
-          <span>Ventas</span>
-        </a>
+        <a class="nav-item" routerLink="/dashboard"   routerLinkActive="active" pRipple><i class="pi pi-home"></i><span>Dashboard</span></a>
+        <a class="nav-item" routerLink="/ventas"      routerLinkActive="active" pRipple><i class="pi pi-receipt"></i><span>Ventas</span></a>
       </div>
 
       <div class="nav-section">
         <span class="nav-section-label">Catálogo</span>
-        <a class="nav-item" routerLink="/productos" routerLinkActive="active" pRipple>
-          <i class="pi pi-box"></i>
-          <span>Productos</span>
-        </a>
-        <a class="nav-item" routerLink="/categorias" routerLinkActive="active" pRipple>
-          <i class="pi pi-tags"></i>
-          <span>Categorías</span>
-        </a>
-        <a class="nav-item" routerLink="/proveedores" routerLinkActive="active" pRipple>
-          <i class="pi pi-truck"></i>
-          <span>Proveedores</span>
-        </a>
+        <a class="nav-item" routerLink="/productos"   routerLinkActive="active" pRipple><i class="pi pi-box"></i><span>Productos</span></a>
+        <a class="nav-item" routerLink="/categorias"  routerLinkActive="active" pRipple><i class="pi pi-tags"></i><span>Categorías</span></a>
+        <a class="nav-item" routerLink="/proveedores" routerLinkActive="active" pRipple><i class="pi pi-truck"></i><span>Proveedores</span></a>
       </div>
 
       <div class="nav-section">
         <span class="nav-section-label">Finanzas</span>
-        <a class="nav-item" routerLink="/gastos" routerLinkActive="active" pRipple>
-          <i class="pi pi-wallet"></i>
-          <span>Gastos</span>
-        </a>
-        <a class="nav-item" routerLink="/movimientos" routerLinkActive="active" pRipple>
-          <i class="pi pi-arrow-right-arrow-left"></i>
-          <span>Movimientos</span>
-        </a>
+        <a class="nav-item" routerLink="/gastos"      routerLinkActive="active" pRipple><i class="pi pi-wallet"></i><span>Gastos</span></a>
+        <a class="nav-item" routerLink="/movimientos" routerLinkActive="active" pRipple><i class="pi pi-arrow-right-arrow-left"></i><span>Movimientos</span></a>
       </div>
 
-      <!-- Solo ADMIN -->
       <div class="nav-section" *ngIf="isAdmin">
         <span class="nav-section-label">Administración</span>
-        <a class="nav-item" routerLink="/usuarios" routerLinkActive="active" pRipple>
-          <i class="pi pi-users"></i>
-          <span>Usuarios</span>
-        </a>
-        <a class="nav-item" routerLink="/empresas" routerLinkActive="active" pRipple>
-          <i class="pi pi-building"></i>
-          <span>Empresas</span>
-        </a>
+        <a class="nav-item" routerLink="/usuarios"    routerLinkActive="active" pRipple><i class="pi pi-users"></i><span>Usuarios</span></a>
+        <a class="nav-item" routerLink="/empresas"    routerLinkActive="active" pRipple><i class="pi pi-building"></i><span>Empresas</span></a>
       </div>
     </nav>
 
-    <!-- Footer del sidebar -->
     <div class="sidebar-footer">
       <div class="user-info">
-        <p-avatar
-          [label]="userInitial"
-          styleClass="user-avatar"
-          shape="circle"
-        />
+        <p-avatar [label]="userInitial" styleClass="user-avatar" shape="circle" />
         <div class="user-details">
           <span class="user-name">{{ userName }}</span>
           <span class="user-role">{{ userRol }}</span>
         </div>
       </div>
     </div>
-
   </aside>
 
   <!-- ── CONTENIDO PRINCIPAL ──────────────────────────── -->
   <div class="main-area">
-
-    <!-- NAVBAR -->
     <header class="navbar">
       <div class="navbar-left">
-        <!-- Botón hamburguesa en móvil -->
         <button class="mobile-menu-btn" (click)="toggleMobileSidebar()" pRipple>
           <i class="pi pi-bars"></i>
         </button>
@@ -106,19 +71,19 @@
       </div>
 
       <div class="navbar-right">
-        <!-- Notificaciones stock bajo -->
+        <!-- ✅ BOTÓN NUEVA VENTA en navbar (siempre visible) -->
+        <button class="nueva-venta-nav-btn" (click)="abrirNuevaVenta()" pRipple pTooltip="Nueva venta" tooltipPosition="bottom">
+          <i class="pi pi-shopping-cart"></i>
+          <span>Nueva venta</span>
+        </button>
+
         <button class="nav-btn" pRipple pTooltip="Stock bajo" tooltipPosition="bottom">
           <i class="pi pi-bell"></i>
           <span class="badge" *ngIf="stockBajoCount > 0">{{ stockBajoCount }}</span>
         </button>
 
-        <!-- Perfil -->
         <button class="nav-btn profile-btn" (click)="menu.toggle($event)" pRipple>
-          <p-avatar
-            [label]="userInitial"
-            styleClass="nav-avatar"
-            shape="circle"
-          />
+          <p-avatar [label]="userInitial" styleClass="nav-avatar" shape="circle" />
           <span class="profile-name">{{ userName }}</span>
           <i class="pi pi-chevron-down"></i>
         </button>
@@ -127,18 +92,211 @@
       </div>
     </header>
 
-    <!-- Overlay móvil -->
-    <div
-      class="mobile-overlay"
-      [class.visible]="mobileSidebarOpen"
-      (click)="toggleMobileSidebar()"
-    ></div>
+    <div class="mobile-overlay" [class.visible]="mobileSidebarOpen" (click)="toggleMobileSidebar()"></div>
 
-    <!-- Router outlet -->
     <main class="page-content">
       <router-outlet />
     </main>
-
   </div>
 
 </div>
+
+<!-- ══ DRAWER NUEVA VENTA (global, siempre disponible) ══════ -->
+<div class="drawer-overlay" [class.open]="drawerVisible" (click)="cerrarDrawer()"></div>
+
+<div class="drawer-panel" [class.open]="drawerVisible">
+
+  <!-- Header -->
+  <div class="dp-header">
+    <div class="dp-title">
+      <i class="pi pi-shopping-cart"></i>
+      Nueva Venta
+    </div>
+    <button class="dp-close" (click)="cerrarDrawer()"><i class="pi pi-times"></i></button>
+  </div>
+
+  <!-- Steps -->
+  <div class="dp-steps">
+    <div class="step" [class.active]="pasoActual === 'carrito'" [class.done]="pasoActual === 'pago' || pasoActual === 'recibo'">
+      <span class="step-num">1</span><span class="step-label">Carrito</span>
+    </div>
+    <div class="step-line" [class.done]="pasoActual === 'pago' || pasoActual === 'recibo'"></div>
+    <div class="step" [class.active]="pasoActual === 'pago'" [class.done]="pasoActual === 'recibo'">
+      <span class="step-num">2</span><span class="step-label">Pago</span>
+    </div>
+    <div class="step-line" [class.done]="pasoActual === 'recibo'"></div>
+    <div class="step" [class.active]="pasoActual === 'recibo'">
+      <span class="step-num">3</span><span class="step-label">Recibo</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dp-body">
+
+    <!-- PASO 1: CARRITO -->
+    <ng-container *ngIf="pasoActual === 'carrito'">
+      <div class="search-wrap">
+        <div class="search-field">
+          <i class="pi pi-search"></i>
+          <input type="text" [(ngModel)]="busqueda" (ngModelChange)="buscarProductos()"
+            placeholder="Buscar producto por nombre..." autocomplete="off" class="search-input" />
+          <button class="search-clear" *ngIf="busqueda" (click)="limpiarBusqueda()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="search-results" *ngIf="resultadosBusqueda.length > 0">
+          <div class="search-item" *ngFor="let p of resultadosBusqueda" (click)="agregarAlCarrito(p)">
+            <div class="si-info">
+              <span class="si-nombre">{{ p.nombre }}</span>
+              <span class="si-stock" [class.low]="p.stock <= (p.stockMinimo ?? 0)">Stock: {{ p.stock }}</span>
+            </div>
+            <span class="si-precio">S/ {{ p.precioVenta | number:'1.2-2' }}</span>
+            <div class="si-add"><i class="pi pi-plus"></i></div>
+          </div>
+        </div>
+        <div class="search-no-results" *ngIf="busqueda && resultadosBusqueda.length === 0">
+          Sin resultados para "{{ busqueda }}"
+        </div>
+      </div>
+
+      <div class="carrito-empty" *ngIf="carrito.length === 0">
+        <i class="pi pi-inbox"></i>
+        <span>Busca y agrega productos para comenzar</span>
+      </div>
+
+      <ng-container *ngIf="carrito.length > 0">
+        <div class="section-label"><i class="pi pi-list-check"></i> Productos ({{ carrito.length }})</div>
+        <div class="carrito-list">
+          <div class="carrito-item" *ngFor="let item of carrito; let i = index">
+            <div class="ci-info">
+              <span class="ci-nombre">{{ item.nombre }}</span>
+              <span class="ci-unit">S/ {{ item.precioVenta | number:'1.2-2' }} × {{ item.cantidad }}</span>
+            </div>
+            <div class="ci-controls">
+              <button class="qty-btn" (click)="decrementar(i)"><i class="pi pi-minus"></i></button>
+              <span class="qty">{{ item.cantidad }}</span>
+              <button class="qty-btn" (click)="incrementar(i)" [disabled]="item.cantidad >= item.stock"><i class="pi pi-plus"></i></button>
+            </div>
+            <span class="ci-sub">S/ {{ (item.precioVenta * item.cantidad) | number:'1.2-2' }}</span>
+            <button class="rm-btn" (click)="quitarDelCarrito(i)"><i class="pi pi-trash"></i></button>
+          </div>
+        </div>
+
+        <div class="total-bar">
+          <span class="total-label">Total</span>
+          <span class="total-val">S/ {{ totalCarrito | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="nota-wrap">
+          <label>Nota <span class="opt">opcional</span></label>
+          <input type="text" [(ngModel)]="nota" placeholder="Ej: Mesa 3..." class="nota-input" />
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- PASO 2: PAGO -->
+    <ng-container *ngIf="pasoActual === 'pago'">
+      <div class="section-label"><i class="pi pi-credit-card"></i> Método de pago</div>
+      <div class="pago-grid">
+        <button class="pago-btn" *ngFor="let tp of tiposPago"
+          [class.selected]="tipoPagoSeleccionado === tp.value"
+          (click)="seleccionarPago(tp.value)">
+          <i class="pi" [class]="tp.icon"></i>
+          <span>{{ tp.label }}</span>
+          <div class="pago-check" *ngIf="tipoPagoSeleccionado === tp.value"><i class="pi pi-check"></i></div>
+        </button>
+      </div>
+
+      <ng-container *ngIf="tipoPagoSeleccionado === 'EFECTIVO'">
+        <div class="field-row">
+          <label>Monto recibido</label>
+          <div class="money-input">
+            <span class="currency">S/</span>
+            <input type="number" [(ngModel)]="montoRecibido" (ngModelChange)="calcularVuelto()"
+              placeholder="0.00" step="0.50" min="0" />
+          </div>
+        </div>
+        <div class="billetes">
+          <span class="billetes-label">Rápido:</span>
+          <button class="billete" *ngFor="let b of billetesRapidos" (click)="usarBillete(b)">S/ {{ b }}</button>
+        </div>
+        <div class="vuelto-box ok" *ngIf="montoRecibido > 0 && montoRecibido >= totalCarrito">
+          <span class="vb-label">Vuelto</span>
+          <span class="vb-val">S/ {{ vuelto | number:'1.2-2' }}</span>
+        </div>
+        <div class="vuelto-box warn" *ngIf="montoRecibido > 0 && montoRecibido < totalCarrito">
+          <span class="vb-label">Falta</span>
+          <span class="vb-val warn">S/ {{ (totalCarrito - montoRecibido) | number:'1.2-2' }}</span>
+        </div>
+      </ng-container>
+
+      <div class="resumen-pago">
+        <div class="rp-row"><span>Ítems</span><span>{{ carrito.length }}</span></div>
+        <div class="rp-divider"></div>
+        <div class="rp-row total"><span>TOTAL</span><span>S/ {{ totalCarrito | number:'1.2-2' }}</span></div>
+      </div>
+    </ng-container>
+
+    <!-- PASO 3: RECIBO -->
+    <ng-container *ngIf="pasoActual === 'recibo'">
+      <div class="recibo-success">
+        <div class="success-icon"><i class="pi pi-check-circle"></i></div>
+        <h3>¡Venta registrada!</h3>
+        <p class="success-num">{{ ventaRegistrada?.numeroVenta }}</p>
+        <p class="success-fecha">{{ ventaRegistrada?.fechaVenta | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="recibo-card">
+        <div class="rc-section">
+          <div class="rc-row"><span>Pago</span><span>{{ ventaRegistrada?.tipoPago }}</span></div>
+          <div class="rc-row" *ngIf="ventaRegistrada?.nota"><span>Nota</span><span>{{ ventaRegistrada?.nota }}</span></div>
+        </div>
+        <div class="rc-divider"></div>
+        <div class="rc-section">
+          <div class="rc-item" *ngFor="let item of carritoFinal">
+            <span class="rc-nombre">{{ item.nombre }}</span>
+            <span class="rc-cant">× {{ item.cantidad }}</span>
+            <span class="rc-sub">S/ {{ (item.precioVenta * item.cantidad) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        <div class="rc-divider"></div>
+        <div class="rc-section">
+          <div class="rc-row total"><span>TOTAL</span><span>S/ {{ ventaRegistrada?.total | number:'1.2-2' }}</span></div>
+          <div class="rc-row" *ngIf="ventaRegistrada?.montoRecibido"><span>Recibido</span><span>S/ {{ ventaRegistrada?.montoRecibido | number:'1.2-2' }}</span></div>
+          <div class="rc-row vuelto" *ngIf="ventaRegistrada?.vuelto > 0"><span>Vuelto</span><span>S/ {{ ventaRegistrada?.vuelto | number:'1.2-2' }}</span></div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div><!-- /dp-body -->
+
+  <!-- Footer -->
+  <div class="dp-footer">
+    <ng-container *ngIf="pasoActual === 'carrito'">
+      <button class="foot-btn cancel" (click)="cerrarDrawer()">Cancelar</button>
+      <button class="foot-btn primary" [disabled]="carrito.length === 0" (click)="irAPagar()">
+        Ir a pagar <i class="pi pi-arrow-right"></i>
+      </button>
+    </ng-container>
+    <ng-container *ngIf="pasoActual === 'pago'">
+      <button class="foot-btn cancel" (click)="pasoActual = 'carrito'">
+        <i class="pi pi-arrow-left"></i> Volver
+      </button>
+      <button class="foot-btn primary" [disabled]="!puedeConfirmar() || guardando" (click)="confirmarVenta()">
+        <i class="pi" [class.pi-spin]="guardando" [class.pi-spinner]="guardando" [class.pi-check]="!guardando"></i>
+        {{ guardando ? 'Guardando...' : 'Confirmar venta' }}
+      </button>
+    </ng-container>
+    <ng-container *ngIf="pasoActual === 'recibo'">
+      <button class="foot-btn cancel" (click)="nuevaVentaRapida()">
+        <i class="pi pi-plus"></i> Nueva venta
+      </button>
+      <button class="foot-btn primary" (click)="imprimirTicket()">
+        <i class="pi pi-print"></i> Imprimir
+      </button>
+    </ng-container>
+  </div>
+
+</div><!-- /drawer-panel -->
+
+<p-toast position="top-right" />

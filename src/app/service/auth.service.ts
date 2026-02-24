@@ -14,6 +14,7 @@ export interface AuthResponse {
   nombre:    string;
   rol:       string;
   empresaId: number;
+  empresaNombre: string;
 }
 
 export interface UserSession {
@@ -21,6 +22,7 @@ export interface UserSession {
   nombre:    string;
   rol:       string;
   empresaId: number;
+  empresaNombre: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,7 +47,8 @@ export class AuthService {
       username:  response.username,
       nombre:    response.nombre,
       rol:       response.rol,
-      empresaId: response.empresaId
+      empresaId: response.empresaId,
+      empresaNombre : response.empresaNombre
     } as UserSession));
   }
 

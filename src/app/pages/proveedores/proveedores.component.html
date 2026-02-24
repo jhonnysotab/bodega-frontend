@@ -1,0 +1,222 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Proveedores</h2>
+      <p>Gestión de proveedores y sus categorías</p>
+    </div>
+    <p-button
+      label="Nuevo proveedor"
+      icon="pi pi-plus"
+      styleClass="btn-primary"
+      (onClick)="abrirDialogCrear()"
+    />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="proveedores"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5,10,25]"
+      [globalFilterFields]="['nombre','empresaProveedor','telefono']"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+      #dt
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar proveedor..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="nombre">Contacto <p-sortIcon field="nombre" /></th>
+          <th pSortableColumn="empresaProveedor">Empresa <p-sortIcon field="empresaProveedor" /></th>
+          <th>Teléfono</th>
+          <th>Categorías</th>
+          <th>Estado</th>
+          <th style="width:120px; text-align:center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <!-- Contacto -->
+          <td>
+            <div class="prov-cell">
+              <p-avatar [label]="p.nombre.charAt(0)" shape="circle" styleClass="prov-avatar" />
+              <span class="prov-nombre">{{ p.nombre }}</span>
+            </div>
+          </td>
+
+          <!-- Empresa -->
+          <td>
+            <div class="empresa-cell">
+              <i class="pi pi-building"></i>
+              <span>{{ p.empresaProveedor || '—' }}</span>
+            </div>
+          </td>
+
+          <!-- Teléfono -->
+          <td>
+            <span class="telefono">
+              <i class="pi pi-phone"></i>
+              {{ p.telefono || '—' }}
+            </span>
+          </td>
+
+          <!-- Categorías -->
+          <td>
+            <div class="cats-chips">
+              <span
+                class="cat-chip"
+                *ngFor="let c of p.categorias?.slice(0,3)"
+              >{{ c.nombre }}</span>
+              <span class="cat-chip more" *ngIf="p.categorias?.length > 3">
+                +{{ p.categorias.length - 3 }}
+              </span>
+              <span class="no-cats" *ngIf="!p.categorias?.length">Sin categorías</span>
+            </div>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <p-tag
+              [value]="p.activo ? 'Activo' : 'Inactivo'"
+              [severity]="p.activo ? 'success' : 'danger'"
+            />
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="btn-action edit"
+                pTooltip="Editar"
+                tooltipPosition="top"
+                (onClick)="abrirDialogEditar(p)"
+              />
+              <p-button
+                [icon]="p.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                styleClass="btn-action toggle"
+                [pTooltip]="p.activo ? 'Desactivar' : 'Activar'"
+                tooltipPosition="top"
+                (onClick)="toggleEstado(p)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                styleClass="btn-action delete"
+                pTooltip="Eliminar"
+                tooltipPosition="top"
+                (onClick)="confirmarEliminar(p)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="pi pi-truck"></i>
+              <span>No hay proveedores registrados</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── DIALOG ────────────────────────────────────────────── -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="editMode ? 'Editar proveedor' : 'Nuevo proveedor'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="prov-dialog"
+  [style]="{ width: '480px' }"
+>
+  <form [formGroup]="proveedorForm" (ngSubmit)="guardar()" novalidate>
+
+    <!-- Nombre contacto -->
+    <div class="field-group">
+      <label>Nombre del contacto</label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-user" />
+        <input pInputText formControlName="nombre" placeholder="Ej: Juan Quispe" class="w-full"
+          [class.ng-invalid]="hasError('nombre')" [class.ng-dirty]="hasError('nombre')" />
+      </p-iconfield>
+      <small class="p-error" *ngIf="hasError('nombre')">El nombre es obligatorio</small>
+    </div>
+
+    <!-- Empresa proveedor -->
+    <div class="field-group">
+      <label>Empresa <span class="optional">(opcional)</span></label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-building" />
+        <input pInputText formControlName="empresaProveedor"
+          placeholder="Ej: Distribuidora Norte SAC" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    <!-- Teléfono -->
+    <div class="field-group">
+      <label>Teléfono <span class="optional">(opcional)</span></label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-phone" />
+        <input pInputText formControlName="telefono"
+          placeholder="Ej: 987654321" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    <!-- Categorías -->
+    <div class="field-group">
+      <label>Categorías que provee</label>
+      <p-multiselect
+        formControlName="categoriaIds"
+        [options]="categoriasOpciones"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Seleccionar categorías"
+        styleClass="w-full"
+        [showClear]="true"
+        emptyMessage="Sin categorías disponibles"
+      />
+    </div>
+
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" styleClass="btn-cancel" (onClick)="cerrarDialog()" />
+    <p-button
+      [label]="editMode ? 'Guardar cambios' : 'Crear proveedor'"
+      icon="pi pi-check"
+      styleClass="btn-primary"
+      [loading]="saving"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog styleClass="confirm-dialog" />
+<p-toast position="top-right" />
