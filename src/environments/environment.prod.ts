@@ -3,5 +3,5 @@
 // hacer el build de producción. Ver DEPLOY.md en el repo del backend.
 export const environment = {
   production: true,
-  apiUrl: 'https://tu-subdominio.duckdns.org'
+  apiUrl: 'https://bodega-jhonnysota.duckdns.org'
 };
