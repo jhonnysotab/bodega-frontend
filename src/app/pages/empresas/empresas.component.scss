@@ -1,29 +1,12 @@
-:host {
-  --accent:        #2dbd7a;
-  --accent-glow:   rgba(45,189,122,0.12);
-  --bg-card:       #111518;
-  --border:        #1a2028;
-  --text-primary:  #eef1f3;
-  --text-secondary:#7a8a96;
-  --text-muted:    #3a4a58;
-  --error:         #f05454;
-  --warning:       #f59e0b;
-  --font-display:  'Syne', sans-serif;
-  --font-body:     'DM Sans', sans-serif;
-  --radius:        12px;
-  --radius-sm:     8px;
-}
-
-* { box-sizing: border-box; }
-
 .page { display: flex; flex-direction: column; gap: 1.5rem; }
-
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  
+  
 
   h2 {
     font-family: var(--font-display);

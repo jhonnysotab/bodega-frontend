@@ -7,6 +7,8 @@
       <p>Organiza tus productos por categorías</p>
     </div>
     <p-button
+    
+      *ngIf="authService.isAdmin()"
       label="Nueva categoría"
       icon="pi pi-plus"
       styleClass="btn-primary"
@@ -22,6 +24,7 @@
       [paginator]="true"
       [rows]="10"
       [rowsPerPageOptions]="[5,10,25]"
+      appendTo="body"
       [globalFilterFields]="['nombre','descripcion']"
       dataKey="id"
       styleClass="p-datatable-sm"

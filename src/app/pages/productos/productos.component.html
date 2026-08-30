@@ -8,6 +8,7 @@
     </div>
     <p-button
       label="Nuevo producto"
+      *ngIf="authService.isAdmin()"
       icon="pi pi-plus"
       styleClass="btn-primary"
       (onClick)="abrirDialogCrear()"
@@ -29,6 +30,15 @@
     >
       <ng-template pTemplate="caption">
         <div class="table-toolbar">
+            <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar producto..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
           <!-- Filtro activo -->
           <div class="filter-chips">
             <button
@@ -52,15 +62,7 @@
             >Inactivos</button>
           </div>
 
-          <p-iconfield>
-            <p-inputicon styleClass="pi pi-search" />
-            <input
-              pInputText
-              type="text"
-              placeholder="Buscar producto..."
-              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-            />
-          </p-iconfield>
+        
         </div>
       </ng-template>
 
@@ -186,7 +188,7 @@
   [draggable]="false"
   [resizable]="false"
   styleClass="prod-dialog"
-  [style]="{ width: '480px' }"
+  [style]="{ width: '500px' }"
 >
   <form [formGroup]="productoForm" (ngSubmit)="guardar()" novalidate>
 
@@ -231,7 +233,7 @@
         <p-iconfield class="w-full">
           <p-inputicon styleClass="pi pi-dollar" />
           <input pInputText type="number" formControlName="precioVenta"
-            placeholder="0.00" step="0.01" min="0" class="w-full"
+            placeholder="0.00" step="0.01" min="0" class="w-full" 
             [class.ng-invalid]="hasError('precioVenta')" [class.ng-dirty]="hasError('precioVenta')" />
         </p-iconfield>
         <small class="p-error" *ngIf="hasError('precioVenta')">Ingresa un precio válido</small>
@@ -270,6 +272,7 @@
         placeholder="Seleccionar categoría"
         styleClass="w-full"
         [showClear]="true"
+        appendTo="body"
       />
     </div>
 

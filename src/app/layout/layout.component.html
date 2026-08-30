@@ -26,23 +26,23 @@
         <a class="nav-item" routerLink="/ventas"      routerLinkActive="active" pRipple><i class="pi pi-receipt"></i><span>Ventas</span></a>
       </div>
 
-      <div class="nav-section">
+      <div class="nav-section"   >
         <span class="nav-section-label">Catálogo</span>
         <a class="nav-item" routerLink="/productos"   routerLinkActive="active" pRipple><i class="pi pi-box"></i><span>Productos</span></a>
         <a class="nav-item" routerLink="/categorias"  routerLinkActive="active" pRipple><i class="pi pi-tags"></i><span>Categorías</span></a>
-        <a class="nav-item" routerLink="/proveedores" routerLinkActive="active" pRipple><i class="pi pi-truck"></i><span>Proveedores</span></a>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/proveedores" routerLinkActive="active" pRipple><i class="pi pi-truck"></i><span>Proveedores</span></a>
       </div>
 
       <div class="nav-section">
-        <span class="nav-section-label">Finanzas</span>
-        <a class="nav-item" routerLink="/gastos"      routerLinkActive="active" pRipple><i class="pi pi-wallet"></i><span>Gastos</span></a>
-        <a class="nav-item" routerLink="/movimientos" routerLinkActive="active" pRipple><i class="pi pi-arrow-right-arrow-left"></i><span>Movimientos</span></a>
+        <span class="nav-section-label" *ngIf="isAdmin">Finanzas</span>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/gastos"      routerLinkActive="active" pRipple><i class="pi pi-wallet"></i><span>Gastos</span></a>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/movimientos" routerLinkActive="active" pRipple><i class="pi pi-arrow-right-arrow-left"></i><span>Movimientos</span></a>
       </div>
 
-      <div class="nav-section" *ngIf="isAdmin">
-        <span class="nav-section-label">Administración</span>
-        <a class="nav-item" routerLink="/usuarios"    routerLinkActive="active" pRipple><i class="pi pi-users"></i><span>Usuarios</span></a>
-        <a class="nav-item" routerLink="/empresas"    routerLinkActive="active" pRipple><i class="pi pi-building"></i><span>Empresas</span></a>
+      <div class="nav-section" >
+        <span class="nav-section-label" *ngIf="isAdmin || userRol==='PROGRAMADOR'">Administración</span>
+        <a class="nav-item"  *ngIf="isAdmin || userRol==='PROGRAMADOR'"routerLink="/usuarios"    routerLinkActive="active" pRipple><i class="pi pi-users"></i><span>Usuarios</span></a>
+        <a class="nav-item" *ngIf="userRol==='PROGRAMADOR'" routerLink="/empresas"    routerLinkActive="active" pRipple><i class="pi pi-building"></i><span>Empresas</span></a>
       </div>
     </nav>
 
@@ -138,14 +138,22 @@
       <div class="search-wrap">
         <div class="search-field">
           <i class="pi pi-search"></i>
-          <input type="text" [(ngModel)]="busqueda" (ngModelChange)="buscarProductos()"
-            placeholder="Buscar producto por nombre..." autocomplete="off" class="search-input" />
+     <input type="text" [(ngModel)]="busqueda" (ngModelChange)="buscarProductos()"
+          placeholder="Buscar producto por nombre..." autocomplete="off" class="search-input"
+          (keydown.arrowdown)="moverHighlight(1)"
+          (keydown.arrowup)="moverHighlight(-1)"
+          (keydown.escape)="limpiarBusqueda()"
+          (keydown.enter)="seleccionarHighlighted()" />
+          
           <button class="search-clear" *ngIf="busqueda" (click)="limpiarBusqueda()">
             <i class="pi pi-times"></i>
           </button>
         </div>
         <div class="search-results" *ngIf="resultadosBusqueda.length > 0">
-          <div class="search-item" *ngFor="let p of resultadosBusqueda" (click)="agregarAlCarrito(p)">
+          <div class="search-item" *ngFor="let p of resultadosBusqueda; let i = index"
+  [class.highlighted]="i === highlightedIndex"
+  (click)="agregarAlCarrito(p)">
+
             <div class="si-info">
               <span class="si-nombre">{{ p.nombre }}</span>
               <span class="si-stock" [class.low]="p.stock <= (p.stockMinimo ?? 0)">Stock: {{ p.stock }}</span>

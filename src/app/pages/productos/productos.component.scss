@@ -1,18 +1,4 @@
-:host {
-  --accent:        #2dbd7a;
-  --accent-glow:   rgba(45,189,122,0.12);
-  --bg-card:       #111518;
-  --border:        #1a2028;
-  --text-primary:  #eef1f3;
-  --text-secondary:#7a8a96;
-  --text-muted:    #3a4a58;
-  --error:         #f05454;
-  --warning:       #f59e0b;
-  --font-display:  'Syne', sans-serif;
-  --font-body:     'DM Sans', sans-serif;
-  --radius:        12px;
-  --radius-sm:     8px;
-}
+
 
 * { box-sizing: border-box; }
 
@@ -49,8 +35,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem; 
 }
 
 // Filter chips
@@ -126,7 +111,7 @@
   color: var(--text-muted);
   max-width: 200px;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
 }
 
@@ -224,7 +209,7 @@
 }
 
 .textarea-field {
-  background: #181d21 !important;
+  background: #ffffff !important;
   border: 1.5px solid var(--border) !important;
   border-radius: var(--radius-sm) !important;
   color: var(--text-primary) !important;
@@ -259,7 +244,7 @@
     font-weight: 700 !important;
     font-size: 0.875rem !important;
     border-radius: var(--radius-sm) !important;
-    &:hover { background: #22a066 !important; }
+    &:hover { background: var(--accent-hover) !important; }
   }
 
   .btn-cancel.p-button {
@@ -319,12 +304,12 @@
   }
 
   .prod-dialog {
-    background: #111518 !important;
+    background: #fff9f9 !important;
     border: 1px solid var(--border) !important;
-    border-radius: var(--radius) !important;
     .p-dialog-header {
-      background: #111518 !important;
+      background: #ffffff !important;
       border-bottom: 1px solid var(--border) !important;
+      border-radius: var(--radius) !important;
       padding: 1.25rem 1.5rem !important;
       .p-dialog-title {
         font-family: var(--font-display) !important;
@@ -333,9 +318,9 @@
         font-size: 1rem !important;
       }
     }
-    .p-dialog-content { background: #111518 !important; padding: 1.5rem !important; }
+    .p-dialog-content { background: #eef1f3 !important; padding: 1.5rem !important; }
     .p-dialog-footer {
-      background: #111518 !important;
+      background: --bg-card !important;
       border-top: 1px solid var(--border) !important;
       padding: 1rem 1.5rem !important;
       display: flex; gap: 8px; justify-content: flex-end;
@@ -343,13 +328,13 @@
   }
 
   .p-select {
-    background: #181d21 !important;
+    background:--text-muted !important;
     border-color: var(--border) !important;
     border-radius: var(--radius-sm) !important;
     &:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
   }
   .p-select-overlay {
-    background: #181d21 !important;
+    background:   --text-muted !important;
     border-color: var(--border) !important;
     border-radius: var(--radius-sm) !important;
     .p-select-option:hover { background: var(--accent-glow) !important; color: var(--accent) !important; }

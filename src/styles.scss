@@ -1,66 +1,194 @@
-// ── Activa el tema oscuro de PrimeNG ──────────────────────
-// Agrega la clase 'dark-mode' al <html> para activar el dark theme
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
 html {
   font-size: 16px;
+  color-scheme: light;
 }
 
-// Aplica dark mode globalmente al cargar
-html.dark-mode {
-  color-scheme: dark;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-// ── Reset básico ───────────────────────────────────────────
-*, *::before, *::after {
-  box-sizing: border-box;
+// ── Variables globales ─────────────────────────────────────
+:root {
+  --accent:           #6366f1;
+  --accent-hover:     #4f46e5;
+  --accent-glow:      rgba(99,102,241,0.10);
+  --accent-light:     rgba(99,102,241,0.08);
+
+  --success:          #16a34a;
+  --success-glow:     rgba(22,163,74,0.10);
+  --warning:          #d97706;
+  --warning-glow:     rgba(217,119,6,0.10);
+  --error:            #dc2626;
+  --error-glow:       rgba(220,38,38,0.10);
+  --info:             #0284c7;
+  --info-glow:        rgba(2,132,199,0.10);
+
+  --bg-base:          #f1f5f9;
+  --bg-card:          #ffffff;
+  --bg-input:         #f8fafc;
+
+  --border:           #e2e8f0;
+  --border-strong:    #cbd5e1;
+
+  --text-primary:     #0f172a;
+  --text-secondary:   #475569;
+  --text-muted:       #94a3b8;
+
+  --font-display:     'Syne', sans-serif;
+  --font-body:        'DM Sans', sans-serif;
+  --radius:           12px !important;
+  --radius-sm:        8px !important;
+
+  --shadow-sm:        0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:        0 4px 16px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:        0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background: #0a0d0f;
-  color: #eef1f3;
-  font-family: 'DM Sans', sans-serif;
+  margin: 0; padding: 0;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 // ── PrimeNG global tweaks ──────────────────────────────────
 
-// Inputs: borde y fondo alineados al diseño dark
 .p-inputtext {
-  background: #181d21 !important;
-  border-color: #1e252b !important;
-  color: #eef1f3 !important;
-  border-radius: 8px !important;
+  background: var(--bg-input) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-body) !important;
 
   &:focus {
-    border-color: #2dbd7a !important;
-    box-shadow: 0 0 0 3px rgba(45, 189, 122, 0.15) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    outline: none !important;
   }
 
   &.ng-invalid.ng-dirty {
-    border-color: var(--p-red-400) !important;
-    box-shadow: 0 0 0 3px rgba(240, 84, 84, 0.1) !important;
+    border-color: var(--error) !important;
+    box-shadow: 0 0 0 3px var(--error-glow) !important;
   }
 
-  &::placeholder {
-    color: #3a4a58 !important;
+  &::placeholder { color: var(--text-muted) !important; }
+}
+
+.p-select {
+  background: var(--bg-input) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  &:hover  { border-color: var(--border-strong) !important; }
+  &.p-focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
+  .p-select-label       { color: var(--text-primary) !important; }
+  .p-select-placeholder { color: var(--text-muted) !important; }
+}
+
+.p-select-overlay {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-lg) !important;
+  .p-select-option {
+    color: var(--text-secondary) !important;
+    &:hover      { background: var(--accent-light) !important; color: var(--accent) !important; }
+    &.p-highlight { background: var(--accent-light) !important; color: var(--accent) !important; font-weight: 600; }
   }
 }
 
-// Toast: fondo oscuro
-.p-toast {
-  .p-toast-message {
-    border-radius: 10px !important;
-    backdrop-filter: blur(8px);
+.p-datepicker {
+  background: var(--bg-input) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  &.p-focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
+}
+
+.p-toast .p-toast-message {
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border) !important;
+  background: #fff !important;
+}
+
+.p-confirmdialog {
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border) !important;
+  background: #fff !important;
+}
+
+.p-datatable {
+  background: transparent !important;
+  font-family: var(--font-body) !important;
+
+  .p-datatable-thead > tr > th {
+    background: #f8fafc !important;
+    color: var(--text-muted) !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    border-color: var(--border) !important;
+    border-bottom: 2px solid var(--border) !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  .p-datatable-tbody > tr {
+    background: #fff !important;
+    border-bottom: 1px solid var(--border) !important;
+    transition: background 0.15s !important;
+    &:hover { background: #f8fafc !important; }
+    > td {
+      color: var(--text-secondary) !important;
+      font-size: 0.875rem !important;
+      border: none !important;
+      padding: 0.8rem 1rem !important;
+    }
+  }
+
+  .p-paginator {
+    background: #f8fafc !important;
+    border-top: 1px solid var(--border) !important;
+    .p-paginator-page, .p-paginator-prev, .p-paginator-next {
+      color: var(--text-secondary) !important;
+      border-radius: var(--radius-sm) !important;
+      min-width: 32px !important; height: 32px !important;
+      &:hover     { background: var(--accent-light) !important; color: var(--accent) !important; }
+      &.p-highlight { background: var(--accent) !important; color: #fff !important; }
+    }
+  }
+
+  .p-sortable-column:hover { background: #f1f5f9 !important; }
+  .p-sortable-column.p-highlight {
+    color: var(--accent) !important;
+    .p-sortable-column-icon { color: var(--accent) !important; }
   }
 }
 
-// Scrollbar personalizado
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0d0f; }
-::-webkit-scrollbar-thumb {
-  background: #1e252b;
-  border-radius: 3px;
-  &:hover { background: #2dbd7a44; }
+.p-menu {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-lg) !important;
+  .p-menuitem-link {
+    border-radius: 6px !important;
+    color: var(--text-secondary) !important;
+    &:hover { background: var(--accent-light) !important; color: var(--accent) !important; }
+    .p-menuitem-icon { color: var(--text-muted) !important; }
+  }
 }
+
+.p-tooltip .p-tooltip-text {
+  background: var(--text-primary) !important;
+  color: #fff !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+}
+
+// Scrollbar
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; &:hover { background: #94a3b8; } }

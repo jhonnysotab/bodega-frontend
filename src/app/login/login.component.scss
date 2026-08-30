@@ -1,23 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-// ── Variables propias (complementan el tema de PrimeNG) ────
 :host {
-  --brand-accent:     #2dbd7a;
-  --brand-accent-dim: rgba(45, 189, 122, 0.15);
-  --brand-dark:       #22a066;
-  --bg-base:          #0a0d0f;
-  --bg-panel:         #0d1419;
-  --border-subtle:    #1a2028;
-  --text-primary:     #eef1f3;
-  --text-secondary:   #7a8a96;
-  --text-muted:       #3a4a58;
+  --accent:           #6366f1;
+  --accent-hover:     #4f46e5;
+  --accent-glow:      rgba(99,102,241,0.12);
+  --accent-light:     rgba(99,102,241,0.08);
+
+  --bg-base:          #f1f5f9;
+  --bg-panel:         #ffffff;
+  --bg-brand:         #1e1b4b;   // índigo profundo para panel izquierdo
+  --border:           #e2e8f0;
+  --border-strong:    #cbd5e1;
+
+  --text-primary:     #0f172a;
+  --text-secondary:   #475569;
+  --text-muted:       #94a3b8;
+
   --font-display:     'Syne', sans-serif;
   --font-body:        'DM Sans', sans-serif;
+
+  --shadow-md:        0 4px 16px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:        0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
 }
 
 * { box-sizing: border-box; }
 
-// ── Wrapper principal ──────────────────────────────────────
+// ── Wrapper ────────────────────────────────────────────────
 .login-wrapper {
   display: flex;
   min-height: 100vh;
@@ -25,7 +33,8 @@
   font-family: var(--font-body);
 }
 
-// ── PANEL IZQUIERDO ────────────────────────────────────────
+// ── PANEL IZQUIERDO (branding) ─────────────────────────────
+// Fondo índigo oscuro para contraste y personalidad
 .brand-panel {
   position: relative;
   flex: 0 0 48%;
@@ -33,8 +42,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(145deg, #0d1419 0%, #0a1612 60%, #091210 100%);
-  border-right: 1px solid var(--border-subtle);
+  background: linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
 
   @media (max-width: 900px) { display: none; }
 }
@@ -47,7 +55,7 @@
   width: 100%;
 }
 
-// Logo
+// Logo en panel izquierdo
 .brand-logo {
   display: flex;
   align-items: center;
@@ -56,27 +64,18 @@
 }
 
 .logo-icon {
-  width: 46px;
-  height: 46px;
-  background: var(--brand-accent-dim);
-  border: 1px solid rgba(45, 189, 122, 0.3);
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  .pi {
-    font-size: 1.3rem;
-    color: var(--brand-accent);
-  }
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  .pi { font-size: 1.3rem; color: #fff; }
 }
 
 .logo-text {
   font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.4rem; font-weight: 700;
+  color: #fff;
   letter-spacing: -0.02em;
 }
 
@@ -89,18 +88,19 @@
     font-size: clamp(2.2rem, 3.2vw, 2.9rem);
     font-weight: 800;
     line-height: 1.1;
-    color: var(--text-primary);
+    color: #fff;
     letter-spacing: -0.04em;
     margin-bottom: 1rem;
 
     .accent {
-      color: var(--brand-accent);
+      // Acento más claro sobre el fondo índigo oscuro
+      color: #a5b4fc;
     }
   }
 
   p {
     font-size: 0.95rem;
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.6);
     line-height: 1.7;
     font-weight: 300;
   }
@@ -110,41 +110,34 @@
 .brand-stats {
   display: flex;
   align-items: center;
-  gap: 1.35rem; 
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-subtle);
+  gap: 1.35rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
+  padding: 1rem 1.5rem;
 
-  // Overrides del Divider de PrimeNG
   ::ng-deep .p-divider.p-divider-vertical {
-    margin: 0;
-    padding: 0;
-    min-width: 1px;
-    width: 1px;
-    height: 36px;
-    background: var(--border-subtle);
+    margin: 0; padding: 0;
+    min-width: 1px; width: 1px; height: 36px;
+    background: rgba(255,255,255,0.15);
     border: none;
-
     &::before { display: none; }
   }
 }
 
 .stat {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: flex; flex-direction: column; gap: 3px;
 
   .stat-number {
     font-family: var(--font-display);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--brand-accent);
+    font-size: 1.25rem; font-weight: 700;
+    color: #a5b4fc;
     line-height: 1;
   }
 
   .stat-label {
     font-size: 0.68rem;
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.45);
     text-transform: uppercase;
     letter-spacing: 0.07em;
     font-weight: 500;
@@ -152,56 +145,50 @@
   }
 }
 
-// Decoraciones
-.brand-decoration {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.deco-circle {
-  position: absolute;
-  border-radius: 50%;
-}
-
+// Decoraciones — círculos índigo más suaves
+.brand-decoration { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.deco-circle { position: absolute; border-radius: 50%; }
 .deco-1 {
   width: 520px; height: 520px;
   top: -160px; right: -200px;
-  background: radial-gradient(circle, rgba(45, 189, 122, 0.05) 0%, transparent 65%);
-  border: 1px solid rgba(45, 189, 122, 0.05);
+  background: radial-gradient(circle, rgba(165,180,252,0.08) 0%, transparent 65%);
+  border: 1px solid rgba(165,180,252,0.08);
 }
-
 .deco-2 {
   width: 280px; height: 280px;
   bottom: 60px; left: -100px;
-  background: radial-gradient(circle, rgba(45, 189, 122, 0.04) 0%, transparent 65%);
-  border: 1px solid rgba(45, 189, 122, 0.06);
+  background: radial-gradient(circle, rgba(165,180,252,0.06) 0%, transparent 65%);
+  border: 1px solid rgba(165,180,252,0.08);
 }
-
 .deco-grid {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(45, 189, 122, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45, 189, 122, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(165,180,252,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(165,180,252,0.04) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at 70% 40%, black 10%, transparent 70%);
 }
 
-// ── PANEL DERECHO ──────────────────────────────────────────
+// ── PANEL DERECHO (formulario) ─────────────────────────────
 .form-panel {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
+  background: var(--bg-base);
 }
 
 .form-container {
-  width: 100%;
-  max-width: 400px;
-  animation: slideUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+  width: 100%; max-width: 400px;
+  animation: slideUp 0.45s cubic-bezier(0.4,0,0.2,1) both;
+
+  // Card blanca con sombra
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-md);
 }
 
 @keyframes slideUp {
@@ -214,172 +201,174 @@
   display: none;
   align-items: center;
   gap: 10px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.2rem;
+  font-weight: 700; font-size: 1.2rem;
   color: var(--text-primary);
 
   @media (max-width: 900px) { display: flex; }
 
   .logo-icon-sm {
-    width: 36px;
-    height: 36px;
-    background: var(--brand-accent-dim);
-    border: 1px solid rgba(45, 189, 122, 0.25);
+    width: 36px; height: 36px;
+    background: var(--accent-light);
+    border: 1.5px solid rgba(99,102,241,0.2);
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .pi { font-size: 1rem; color: var(--brand-accent); }
+    display: flex; align-items: center; justify-content: center;
+    .pi { font-size: 1rem; color: var(--accent); }
   }
 }
 
-// Header
+// Header del form
 .form-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
+  text-align: center;
+
+  // Ícono decorativo
+  &::before {
+    content: '';
+    display: block;
+    width: 48px; height: 48px;
+    background: var(--accent-light);
+    border: 1.5px solid rgba(99,102,241,0.2);
+    border-radius: 12px;
+    margin: 0 auto 1rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3Cpath d='M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px;
+  }
 
   h2 {
     font-family: var(--font-display);
-    font-size: 1.85rem;
-    font-weight: 700;
+    font-size: 1.6rem; font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.03em;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.3rem;
   }
 
   p {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 300;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 400;
   }
 }
 
 // ── Campos ─────────────────────────────────────────────────
 .field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  margin-bottom: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  margin-bottom: 1.1rem;
   position: relative;
 
   label {
-    font-size: 0.78rem;
-    font-weight: 500;
+    font-size: 0.75rem; font-weight: 600;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: uppercase; letter-spacing: 0.05em;
   }
 
   .p-error {
     font-size: 0.78rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-
+    display: flex; align-items: center; gap: 5px;
+    color: #dc2626;
     .pi { font-size: 0.75rem; }
   }
 }
 
-// Override PrimeNG InputText
+// PrimeNG overrides — light mode
 ::ng-deep {
   .p-inputtext {
     font-family: var(--font-body) !important;
     font-size: 0.95rem !important;
     font-weight: 400 !important;
     padding-left: 2.75rem !important;
-   padding-right: 10rem !important;
-    &.input-password {
-      padding-right: 10rem !important;
+    background: var(--bg-base) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+
+    &:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px var(--accent-glow) !important;
+      background: #fff !important;
     }
+
+    &.ng-invalid.ng-dirty {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.10) !important;
+    }
+
+    &::placeholder { color: var(--text-muted) !important; }
+
+    &.input-password { padding-right: 2.75rem !important; }
   }
 
-  // IconField wrapper
-  .p-iconfield {
-    width: 100%;
-  }
+  .p-iconfield { width: 100%; }
 
-  // Message de error del servidor
   .server-msg {
     margin-bottom: 1rem;
     border-radius: 8px !important;
-
-    .p-message-text {
-      font-family: var(--font-body) !important;
-      font-size: 0.875rem !important;
-    }
+    .p-message-text { font-family: var(--font-body) !important; font-size: 0.875rem !important; }
   }
 
-  // Botón principal — override con color de marca
+  // Botón principal — índigo
   .btn-login.p-button {
     margin-top: 0.5rem;
     font-family: var(--font-display) !important;
     font-weight: 700 !important;
     font-size: 0.95rem !important;
-    background: var(--brand-accent) !important;
-    border-color: var(--brand-accent) !important;
-    color: #051a0e !important;
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
     border-radius: 8px !important;
     padding: 0.85rem 1.5rem !important;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.3) !important;
     transition: background 0.2s, box-shadow 0.2s, transform 0.15s !important;
 
     &:hover:not(:disabled) {
-      background: var(--brand-dark) !important;
-      border-color: var(--brand-dark) !important;
-      box-shadow: 0 8px 24px rgba(45, 189, 122, 0.28) !important;
+      background: var(--accent-hover) !important;
+      border-color: var(--accent-hover) !important;
+      box-shadow: 0 6px 20px rgba(99,102,241,0.38) !important;
       transform: translateY(-1px);
     }
-
-    &:active:not(:disabled) {
-      transform: translateY(0) !important;
-    }
-
-    &:disabled {
-      opacity: 0.65 !important;
-    }
+    &:active:not(:disabled) { transform: translateY(0) !important; }
+    &:disabled { opacity: 0.6 !important; box-shadow: none !important; }
   }
 }
 
-// Toggle ojo contraseña (posicionado sobre el input)
+// Toggle ojo contraseña
 .toggle-eye {
   position: absolute;
-  right: 12px;
-  top: 36px; // label height + gap
-  background: none;
-  border: none;
-  cursor: pointer;
+  right: 12px; top: 36px;
+  background: none; border: none; cursor: pointer;
   color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border-radius: 6px;
-  transition: color 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border-radius: 6px; transition: color 0.2s, background 0.2s;
   z-index: 10;
-
   .pi { font-size: 1rem; }
-  &:hover { color: var(--text-secondary); }
+  &:hover { color: var(--accent); background: var(--accent-light); }
 }
 
 // Footer
 .footer-note {
-  margin-top: 1.75rem;
+  margin-top: 1.5rem;
   text-align: center;
   font-size: 0.8rem;
   color: var(--text-muted);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
 
-  span {
-    color: var(--text-secondary);
-    margin-left: 4px;
-  }
+  span { color: var(--accent); margin-left: 4px; font-weight: 500; }
 }
 
-// ── Responsive móvil ───────────────────────────────────────
-@media (max-width: 480px) {
-  .form-panel { padding: 1.5rem 1.25rem; }
-  .form-header h2 { font-size: 1.6rem; }
+// ── Responsive ─────────────────────────────────────────────
+@media (max-width: 900px) {
+  .form-panel { background: var(--bg-base); }
+  .form-container { box-shadow: var(--shadow-lg); }
+}
 
-  // Evita zoom automático en iOS
+@media (max-width: 480px) {
+  .form-panel { padding: 1.5rem 1.25rem; align-items: flex-start; padding-top: 3rem; }
+  .form-header h2 { font-size: 1.5rem; }
+  .form-container { padding: 2rem 1.5rem; }
   ::ng-deep .p-inputtext { font-size: 16px !important; }
 }
