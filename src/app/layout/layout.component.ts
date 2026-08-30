@@ -1,102 +1,129 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import type { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
 
 // PrimeNG
-import { AvatarModule }  from 'primeng/avatar';
-import { MenuModule }    from 'primeng/menu';
-import { RippleModule }  from 'primeng/ripple';
+import { AvatarModule } from 'primeng/avatar';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { ToastModule }   from 'primeng/toast';
+import { ToastModule } from 'primeng/toast';
+import { PopoverModule } from 'primeng/popover';
 import { MenuItem, MessageService } from 'primeng/api';
 
-import { AuthService }        from '../service/auth.service';
+import { AuthService } from '../service/auth.service';
 import { VentaDrawerService } from '../service/venta.drawer.service';
-import { environment }        from '../../environments/environment';
+import { CajaService } from '../service/caja.service';
+import { environment } from '../../environments/environment';
 
 interface CarritoItem {
-  id: number; nombre: string; precioVenta: number; cantidad: number; stock: number; stockMinimo?: number;
+  id: number;
+  nombre: string;
+  precioVenta: number;
+  cantidad: number;
+  stock: number;
+  stockMinimo?: number;
 }
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterModule,
-    AvatarModule, MenuModule, RippleModule, TooltipModule, ToastModule,
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    AvatarModule,
+    MenuModule,
+    RippleModule,
+    TooltipModule,
+    ToastModule,
+    PopoverModule,
   ],
   providers: [MessageService],
   templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss']
+  styleUrls: ['./layout.component.scss'],
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-
   // Sidebar
-  sidebarCollapsed  = false;
+  sidebarCollapsed = false;
   mobileSidebarOpen = false;
-  stockBajoCount    = 0;
-  userName    = '';
+  stockBajoCount = 0;
+  productosStockBajo: any[] = [];
+  userName = '';
   userInitial = '';
-  userRol     = '';
-  isAdmin     = false;
-  pageTitle   = 'Dashboard';
+  userRol = '';
+  isAdmin = false;
+  pageTitle = 'Dashboard';
   profileMenu: MenuItem[] = [];
 
   // ── DRAWER NUEVA VENTA ────────────────────────────────
-  drawerVisible  = false;
+  drawerVisible = false;
   pasoActual: 'carrito' | 'pago' | 'recibo' = 'carrito';
-  guardando      = false;
+  guardando = false;
 
-  busqueda             = '';
-  todosLosProductos:   any[] = [];
-  resultadosBusqueda:  any[] = [];
+  highlightedIndex = -1;
+  busqueda = '';
+  todosLosProductos: any[] = [];
+  resultadosBusqueda: any[] = [];
 
-  carrito:      CarritoItem[] = [];
+  carrito: CarritoItem[] = [];
   carritoFinal: CarritoItem[] = [];
-  nota          = '';
+  nota = '';
+
+  // ── ESCÁNER DE CÓDIGO DE BARRAS (cámara) ──────────────
+  @ViewChild('scannerVideo') scannerVideoRef?: ElementRef<HTMLVideoElement>;
+  scannerVisible = false;
+  scannerError = '';
+  private codeReader: BrowserMultiFormatReader | null = null;
+  private scannerControls: IScannerControls | null = null;
+  private scannerCodigoDetectado = false;
 
   tiposPago = [
-    { label: 'Efectivo',      value: 'EFECTIVO',     icon: 'pi-money-bill' },
-    { label: 'Yape',          value: 'YAPE',          icon: 'pi-mobile' },
-    { label: 'Plin',          value: 'PLIN',          icon: 'pi-mobile' },
+    { label: 'Efectivo', value: 'EFECTIVO', icon: 'pi-money-bill' },
+    { label: 'Yape', value: 'YAPE', icon: 'pi-mobile' },
+    { label: 'Plin', value: 'PLIN', icon: 'pi-mobile' },
     { label: 'Transferencia', value: 'TRANSFERENCIA', icon: 'pi-send' },
   ];
   tipoPagoSeleccionado = '';
-  montoRecibido        = 0;
-  vuelto               = 0;
-  billetesRapidos      = [10, 20, 50, 100, 200];
-  ventaRegistrada:     any = null;
+  montoRecibido = 0;
+  vuelto = 0;
+  billetesRapidos = [10, 20, 50, 100, 200];
+  ventaRegistrada: any = null;
 
   private sub!: Subscription;
-  private apiVentas    = `${environment.apiUrl}/api/ventas`;
+  private apiVentas = `${environment.apiUrl}/api/ventas`;
   private apiProductos = `${environment.apiUrl}/api/productos`;
 
   constructor(
-    private authService:       AuthService,
+    private authService: AuthService,
     private ventaDrawerService: VentaDrawerService,
-    private router:            Router,
-    private http:              HttpClient,
-    private messageService:    MessageService,
-    private cdr:               ChangeDetectorRef
+    private cajaService: CajaService,
+    private router: Router,
+    private http: HttpClient,
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     const user = this.authService.getUser();
     if (user) {
-      this.userName    = user.nombre;
+      this.userName = user.nombre;
       this.userInitial = user.nombre.charAt(0).toUpperCase();
-      this.userRol     = user.rol;
-      this.isAdmin     = user.rol === 'ADMIN';
+      this.userRol = user.rol;
+      this.isAdmin = user.rol === 'ADMIN';
     }
 
     this.profileMenu = [
-      { label: 'Cerrar sesión', icon: 'pi pi-sign-out', command: () => this.logout() }
+      { label: 'Cerrar sesión', icon: 'pi pi-sign-out', command: () => this.logout() },
     ];
 
-    this.router.events.subscribe(() => { this.pageTitle = this.getPageTitle(); });
+    this.router.events.subscribe(() => {
+      this.pageTitle = this.getPageTitle();
+    });
 
     // Escuchar el servicio compartido
     this.sub = this.ventaDrawerService.abrir$.subscribe(() => {
@@ -104,9 +131,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
     });
 
     this.cargarProductos();
+    this.cargarStockBajo();
+    this.cajaService.cargarActual().subscribe();
   }
 
-  ngOnDestroy(): void { this.sub?.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+    this.detenerScanner();
+  }
 
   // ── Sidebar ───────────────────────────────────────────
   toggleSidebar(): void {
@@ -117,63 +149,250 @@ export class LayoutComponent implements OnInit, OnDestroy {
   toggleMobileSidebar(): void {
     this.mobileSidebarOpen = !this.mobileSidebarOpen;
     const shell = document.querySelector('.app-shell');
-    this.mobileSidebarOpen ? shell?.classList.add('mobile-open') : shell?.classList.remove('mobile-open');
+    this.mobileSidebarOpen
+      ? shell?.classList.add('mobile-open')
+      : shell?.classList.remove('mobile-open');
   }
 
-  logout(): void { this.authService.logout(); this.router.navigate(['/login']); }
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 
   private getPageTitle(): string {
     const titles: Record<string, string> = {
-      '/dashboard': 'Dashboard', '/ventas': 'Ventas', '/productos': 'Productos',
-      '/categorias': 'Categorías', '/proveedores': 'Proveedores', '/gastos': 'Gastos',
-      '/movimientos': 'Movimientos', '/usuarios': 'Usuarios', '/empresas': 'Empresas',
+      '/dashboard': 'Dashboard',
+      '/caja': 'Caja',
+      '/ventas': 'Ventas',
+      '/productos': 'Productos',
+      '/categorias': 'Categorías',
+      '/proveedores': 'Proveedores',
+      '/gastos': 'Gastos',
+      '/movimientos': 'Movimientos',
+      '/reportes': 'Reportes',
+      '/usuarios': 'Usuarios',
+      '/empresas': 'Empresas',
     };
     return titles[this.router.url] ?? 'BodegaPOS';
+  }
+
+  // ── Stock bajo ────────────────────────────────────────
+  cargarStockBajo(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/api/productos/stock-bajo`).subscribe({
+      next: (data) => {
+        this.productosStockBajo = data;
+        this.stockBajoCount = data.length;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   // ── DRAWER ────────────────────────────────────────────
   cargarProductos(): void {
     this.http.get<any[]>(`${this.apiProductos}/activos`).subscribe({
-      next: (data) => { this.todosLosProductos = data.filter(p => p.stock > 0); this.cdr.markForCheck(); }
+      next: (data) => {
+        this.todosLosProductos = data.filter((p) => p.stock > 0);
+        this.cdr.markForCheck();
+      },
     });
   }
 
-  abrirNuevaVenta(): void { this.resetearVenta(); this.drawerVisible = true; this.cdr.markForCheck(); }
-  cerrarDrawer(): void    { this.drawerVisible = false; this.resetearVenta(); this.cdr.markForCheck(); }
+  abrirNuevaVenta(): void {
+    if (!this.cajaService.cajaAbierta) {
+      this.messageService.add({
+        severity: 'warn',
+        detail: 'Debes abrir la caja antes de registrar una venta',
+        life: 3500,
+      });
+      this.router.navigate(['/caja']);
+      return;
+    }
+    this.resetearVenta();
+    this.drawerVisible = true;
+    this.cdr.markForCheck();
+  }
+  cerrarDrawer(): void {
+    this.drawerVisible = false;
+    this.resetearVenta();
+    this.cdr.markForCheck();
+  }
 
   resetearVenta(): void {
-    this.carrito = []; this.busqueda = ''; this.resultadosBusqueda = []; this.nota = '';
-    this.pasoActual = 'carrito'; this.tipoPagoSeleccionado = '';
-    this.montoRecibido = 0; this.vuelto = 0; this.ventaRegistrada = null; this.carritoFinal = [];
+    this.carrito = [];
+    this.busqueda = '';
+    this.resultadosBusqueda = [];
+    this.nota = '';
+    this.pasoActual = 'carrito';
+    this.tipoPagoSeleccionado = '';
+    this.montoRecibido = 0;
+    this.vuelto = 0;
+    this.ventaRegistrada = null;
+    this.carritoFinal = [];
   }
 
   buscarProductos(): void {
     const q = this.busqueda.toLowerCase().trim();
-    if (!q) { this.resultadosBusqueda = []; this.cdr.markForCheck(); return; }
-    this.resultadosBusqueda = this.todosLosProductos.filter(p => p.nombre.toLowerCase().includes(q)).slice(0, 8);
+    if (!q) {
+      this.resultadosBusqueda = [];
+      this.highlightedIndex = -1;
+      this.cdr.markForCheck();
+      return;
+    }
+    this.resultadosBusqueda = this.todosLosProductos
+      .filter((p) => p.nombre.toLowerCase().includes(q))
+      .slice(0, 8);
+    this.highlightedIndex = -1;
+    this.cdr.markForCheck();
+  }
+  moverHighlight(dir: number): void {
+    if (this.resultadosBusqueda.length === 0) return;
+    this.highlightedIndex =
+      (this.highlightedIndex + dir + this.resultadosBusqueda.length) %
+      this.resultadosBusqueda.length;
     this.cdr.markForCheck();
   }
 
-  limpiarBusqueda(): void { this.busqueda = ''; this.resultadosBusqueda = []; this.cdr.markForCheck(); }
+  seleccionarHighlighted(): void {
+    if (this.highlightedIndex >= 0 && this.resultadosBusqueda[this.highlightedIndex]) {
+      this.agregarAlCarrito(this.resultadosBusqueda[this.highlightedIndex]);
+      this.highlightedIndex = -1;
+    }
+  }
+
+  // ── BÚSQUEDA POR CÓDIGO DE BARRAS (lector físico USB/Bluetooth) ──
+  // Un lector físico "escribe" el código y presiona Enter muy rápido. Si el
+  // usuario no navegó con flechas y el texto no calzó con ningún nombre,
+  // lo más probable es que sea un código de barras: lo buscamos exacto.
+  onBusquedaEnter(): void {
+    if (this.highlightedIndex >= 0 && this.resultadosBusqueda[this.highlightedIndex]) {
+      this.seleccionarHighlighted();
+      return;
+    }
+
+    const codigo = this.busqueda.trim();
+    if (!codigo) return;
+
+    if (this.resultadosBusqueda.length === 1) {
+      this.agregarAlCarrito(this.resultadosBusqueda[0]);
+      return;
+    }
+
+    this.buscarPorCodigoBarras(codigo);
+  }
+
+  buscarPorCodigoBarras(codigo: string): void {
+    this.http.get<any>(`${this.apiProductos}/codigo/${encodeURIComponent(codigo)}`).subscribe({
+      next: (producto) => {
+        this.agregarAlCarrito(producto);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'warn',
+          detail: `No se encontró ningún producto con el código "${codigo}"`,
+          life: 3500,
+        });
+      },
+    });
+  }
+
+  // ── ESCÁNER POR CÁMARA ────────────────────────────────
+  abrirScanner(): void {
+    this.scannerError = '';
+    this.scannerVisible = true;
+    this.scannerCodigoDetectado = false;
+    this.cdr.markForCheck();
+    // Esperar a que el <video> del modal esté visible en el DOM
+    setTimeout(() => this.iniciarScanner(), 50);
+  }
+
+  private async iniciarScanner(): Promise<void> {
+    if (!this.scannerVideoRef) return;
+    const { BrowserMultiFormatReader } = await import('@zxing/browser');
+    this.codeReader = new BrowserMultiFormatReader();
+    try {
+      this.scannerControls = await this.codeReader.decodeFromVideoDevice(
+        undefined,
+        this.scannerVideoRef.nativeElement,
+        (result) => {
+          // decodeFromVideoDevice sigue invocando este callback por cada frame hasta que
+          // controls.stop() surte efecto; sin esta bandera, un mismo código detectado en
+          // dos frames seguidos agregaría el producto dos veces al carrito.
+          if (result && !this.scannerCodigoDetectado) {
+            this.scannerCodigoDetectado = true;
+            const codigo = result.getText();
+            this.cerrarScanner();
+            this.buscarPorCodigoBarras(codigo);
+          }
+        },
+      );
+    } catch (err: any) {
+      this.scannerError =
+        err?.name === 'NotAllowedError'
+          ? 'Permiso de cámara denegado. Habilítalo en tu navegador e inténtalo de nuevo.'
+          : 'No se pudo acceder a la cámara del dispositivo.';
+      this.cdr.markForCheck();
+    }
+  }
+
+  cerrarScanner(): void {
+    this.detenerScanner();
+    this.scannerVisible = false;
+    this.cdr.markForCheck();
+  }
+
+  private detenerScanner(): void {
+    this.scannerControls?.stop();
+    this.scannerControls = null;
+    this.codeReader = null;
+  }
+
+  limpiarBusqueda(): void {
+    this.busqueda = '';
+    this.resultadosBusqueda = [];
+    this.cdr.markForCheck();
+  }
 
   agregarAlCarrito(producto: any): void {
-    const ex = this.carrito.find(i => i.id === producto.id);
-    if (ex) { if (ex.cantidad < producto.stock) ex.cantidad++; }
-    else     { this.carrito.push({ id: producto.id, nombre: producto.nombre, precioVenta: producto.precioVenta, cantidad: 1, stock: producto.stock, stockMinimo: producto.stockMinimo }); }
+    const ex = this.carrito.find((i) => i.id === producto.id);
+    if (ex) {
+      if (ex.cantidad < producto.stock) ex.cantidad++;
+    } else {
+      this.carrito.push({
+        id: producto.id,
+        nombre: producto.nombre,
+        precioVenta: producto.precioVenta,
+        cantidad: 1,
+        stock: producto.stock,
+        stockMinimo: producto.stockMinimo,
+      });
+    }
     this.limpiarBusqueda();
     this.cdr.markForCheck();
   }
 
-  incrementar(i: number): void { if (this.carrito[i].cantidad < this.carrito[i].stock) { this.carrito[i].cantidad++; this.cdr.markForCheck(); } }
+  incrementar(i: number): void {
+    if (this.carrito[i].cantidad < this.carrito[i].stock) {
+      this.carrito[i].cantidad++;
+      this.cdr.markForCheck();
+    }
+  }
   decrementar(i: number): void {
     if (this.carrito[i].cantidad > 1) this.carrito[i].cantidad--;
     else this.carrito.splice(i, 1);
     this.cdr.markForCheck();
   }
-  quitarDelCarrito(i: number): void { this.carrito.splice(i, 1); this.cdr.markForCheck(); }
-  get totalCarrito(): number { return this.carrito.reduce((s, i) => s + i.precioVenta * i.cantidad, 0); }
+  quitarDelCarrito(i: number): void {
+    this.carrito.splice(i, 1);
+    this.cdr.markForCheck();
+  }
+  get totalCarrito(): number {
+    return this.carrito.reduce((s, i) => s + i.precioVenta * i.cantidad, 0);
+  }
 
-  irAPagar(): void { this.pasoActual = 'pago'; this.cdr.markForCheck(); }
+  irAPagar(): void {
+    this.pasoActual = 'pago';
+    this.cdr.markForCheck();
+  }
 
   seleccionarPago(tipo: string): void {
     this.tipoPagoSeleccionado = tipo;
@@ -182,8 +401,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  calcularVuelto(): void { this.vuelto = this.montoRecibido - this.totalCarrito; this.cdr.markForCheck(); }
-  usarBillete(valor: number): void { this.montoRecibido = valor; this.calcularVuelto(); }
+  calcularVuelto(): void {
+    this.vuelto = this.montoRecibido - this.totalCarrito;
+    this.cdr.markForCheck();
+  }
+  usarBillete(valor: number): void {
+    this.montoRecibido = valor;
+    this.calcularVuelto();
+  }
 
   puedeConfirmar(): boolean {
     if (!this.tipoPagoSeleccionado) return false;
@@ -194,32 +419,51 @@ export class LayoutComponent implements OnInit, OnDestroy {
   confirmarVenta(): void {
     this.guardando = true;
     const body = {
-      tipoPago:      this.tipoPagoSeleccionado,
-      montoRecibido: this.tipoPagoSeleccionado === 'EFECTIVO' ? this.montoRecibido : this.totalCarrito,
-      vuelto:        this.tipoPagoSeleccionado === 'EFECTIVO' ? Math.max(0, this.vuelto) : 0,
-      nota:          this.nota || null,
-      detalles:      this.carrito.map(i => ({ productoId: i.id, cantidad: i.cantidad, precioVenta: i.precioVenta }))
+      tipoPago: this.tipoPagoSeleccionado,
+      montoRecibido:
+        this.tipoPagoSeleccionado === 'EFECTIVO' ? this.montoRecibido : this.totalCarrito,
+      vuelto: this.tipoPagoSeleccionado === 'EFECTIVO' ? Math.max(0, this.vuelto) : 0,
+      nota: this.nota || null,
+      detalles: this.carrito.map((i) => ({
+        productoId: i.id,
+        cantidad: i.cantidad,
+        precioVenta: i.precioVenta,
+      })),
     };
 
     this.http.post<any>(this.apiVentas, body).subscribe({
       next: (venta) => {
-        this.guardando = false; this.ventaRegistrada = venta;
-        this.carritoFinal = [...this.carrito]; this.pasoActual = 'recibo';
-        this.cargarProductos(); this.cdr.markForCheck();
+        this.guardando = false;
+        this.ventaRegistrada = venta;
+        this.carritoFinal = [...this.carrito];
+        this.pasoActual = 'recibo';
+        this.cargarProductos();
+        this.cargarStockBajo();
+        this.cdr.markForCheck();
         setTimeout(() => this.imprimirTicket(), 600);
-        this.messageService.add({ severity: 'success', detail: 'Venta registrada correctamente', life: 3000 });
+        this.messageService.add({
+          severity: 'success',
+          detail: 'Venta registrada correctamente',
+          life: 3000,
+        });
       },
       error: (err) => {
-        this.guardando = false; this.cdr.markForCheck();
-        this.messageService.add({ severity: 'error', detail: err.error?.error || 'Error al registrar venta', life: 3500 });
-      }
+        this.guardando = false;
+        this.cdr.markForCheck();
+        this.messageService.add({
+          severity: 'error',
+          detail: err.error?.error || 'Error al registrar venta',
+          life: 3500,
+        });
+      },
     });
   }
 
   imprimirTicket(): void {
     console.log(this.authService.getUser());
     const empresa = this.authService.getUser()?.empresaNombre ?? 'BodegaPOS';
-    const v = this.ventaRegistrada; const items = this.carritoFinal;
+    const v = this.ventaRegistrada;
+    const items = this.carritoFinal;
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ticket</title>
     <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',monospace;font-size:12px;width:280px;padding:12px}
     .c{text-align:center}.b{font-weight:bold}.line{border-top:1px dashed #000;margin:6px 0}
@@ -229,17 +473,28 @@ export class LayoutComponent implements OnInit, OnDestroy {
     <div class="c"><div class="titulo">${empresa}</div><div>${v.numeroVenta}</div>
     <div>${new Date(v.fechaVenta).toLocaleString('es-PE')}</div></div>
     <div class="line"></div>
-    ${items.map(i=>`<div class="item"><span class="in">${i.nombre}</span><span>${i.cantidad}x S/${i.precioVenta.toFixed(2)}</span><span class="it">S/${(i.precioVenta*i.cantidad).toFixed(2)}</span></div>`).join('')}
+    ${items.map((i) => `<div class="item"><span class="in">${i.nombre}</span><span>${i.cantidad}x S/${i.precioVenta.toFixed(2)}</span><span class="it">S/${(i.precioVenta * i.cantidad).toFixed(2)}</span></div>`).join('')}
     <div class="line"></div>
     <div class="row total"><span>TOTAL</span><span>S/ ${v.total.toFixed(2)}</span></div>
-    ${v.montoRecibido?`<div class="row"><span>Recibido</span><span>S/ ${Number(v.montoRecibido).toFixed(2)}</span></div>`:''}
-    ${v.vuelto>0?`<div class="row"><span>Vuelto</span><span>S/ ${Number(v.vuelto).toFixed(2)}</span></div>`:''}
+    ${v.montoRecibido ? `<div class="row"><span>Recibido</span><span>S/ ${Number(v.montoRecibido).toFixed(2)}</span></div>` : ''}
+    ${v.vuelto > 0 ? `<div class="row"><span>Vuelto</span><span>S/ ${Number(v.vuelto).toFixed(2)}</span></div>` : ''}
     <div class="line"></div><div class="c">Pago: ${v.tipoPago}</div>
-    ${v.nota?`<div class="c">Nota: ${v.nota}</div>`:''}
+    ${v.nota ? `<div class="c">Nota: ${v.nota}</div>` : ''}
     <div class="line"></div><div class="c">¡Gracias por su compra!</div></body></html>`;
-    const win = window.open('','_blank','width=320,height=500');
-    if(win){win.document.write(html);win.document.close();win.focus();setTimeout(()=>{win.print();win.close();},400);}
+    const win = window.open('', '_blank', 'width=320,height=500');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => {
+        win.print();
+        win.close();
+      }, 400);
+    }
   }
 
-  nuevaVentaRapida(): void { this.resetearVenta(); this.cdr.markForCheck(); }
+  nuevaVentaRapida(): void {
+    this.resetearVenta();
+    this.cdr.markForCheck();
+  }
 }

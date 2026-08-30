@@ -6,12 +6,27 @@
       <h2>Productos</h2>
       <p>Gestión de productos e inventario</p>
     </div>
-    <p-button
-      label="Nuevo producto"
-      icon="pi pi-plus"
-      styleClass="btn-primary"
-      (onClick)="abrirDialogCrear()"
-    />
+    <div class="header-actions" *ngIf="authService.isAdmin()">
+      <button class="btn-import" (click)="descargarPlantilla()" pTooltip="Descargar plantilla de ejemplo" tooltipPosition="top">
+        <i class="pi pi-download"></i> Plantilla
+      </button>
+      <button class="btn-import" (click)="excelInput.click()">
+        <i class="pi pi-file-excel"></i> Importar Excel
+      </button>
+      <button class="btn-import" [disabled]="importandoImagen" (click)="imagenInput.click()">
+        <i class="pi" [class.pi-spin]="importandoImagen" [class.pi-spinner]="importandoImagen" [class.pi-camera]="!importandoImagen"></i>
+        {{ importandoImagen ? 'Analizando...' : 'Importar foto de factura' }}
+      </button>
+      <input #excelInput type="file" accept=".xlsx,.xls" hidden (change)="onExcelSeleccionado($event)" />
+      <input #imagenInput type="file" accept="image/*" hidden (change)="onImagenSeleccionada($event)" />
+
+      <p-button
+        label="Nuevo producto"
+        icon="pi pi-plus"
+        styleClass="btn-primary"
+        (onClick)="abrirDialogCrear()"
+      />
+    </div>
   </div>
 
   <!-- Tabla -->
@@ -29,6 +44,15 @@
     >
       <ng-template pTemplate="caption">
         <div class="table-toolbar">
+            <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar producto..."
+              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            />
+          </p-iconfield>
           <!-- Filtro activo -->
           <div class="filter-chips">
             <button
@@ -52,15 +76,7 @@
             >Inactivos</button>
           </div>
 
-          <p-iconfield>
-            <p-inputicon styleClass="pi pi-search" />
-            <input
-              pInputText
-              type="text"
-              placeholder="Buscar producto..."
-              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-            />
-          </p-iconfield>
+        
         </div>
       </ng-template>
 
@@ -186,7 +202,7 @@
   [draggable]="false"
   [resizable]="false"
   styleClass="prod-dialog"
-  [style]="{ width: '480px' }"
+  [style]="{ width: '500px' }"
 >
   <form [formGroup]="productoForm" (ngSubmit)="guardar()" novalidate>
 
@@ -199,6 +215,15 @@
           [class.ng-invalid]="hasError('nombre')" [class.ng-dirty]="hasError('nombre')" />
       </p-iconfield>
       <small class="p-error" *ngIf="hasError('nombre')">El nombre es obligatorio</small>
+    </div>
+
+    <!-- Código de barras -->
+    <div class="field-group">
+      <label>Código de barras <span class="optional">(opcional, para el escáner)</span></label>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-qrcode" />
+        <input pInputText formControlName="codigoBarras" placeholder="Ej: 7751271001234" class="w-full" />
+      </p-iconfield>
     </div>
 
     <!-- Descripción -->
@@ -231,7 +256,7 @@
         <p-iconfield class="w-full">
           <p-inputicon styleClass="pi pi-dollar" />
           <input pInputText type="number" formControlName="precioVenta"
-            placeholder="0.00" step="0.01" min="0" class="w-full"
+            placeholder="0.00" step="0.01" min="0" class="w-full" 
             [class.ng-invalid]="hasError('precioVenta')" [class.ng-dirty]="hasError('precioVenta')" />
         </p-iconfield>
         <small class="p-error" *ngIf="hasError('precioVenta')">Ingresa un precio válido</small>
@@ -270,6 +295,7 @@
         placeholder="Seleccionar categoría"
         styleClass="w-full"
         [showClear]="true"
+        appendTo="body"
       />
     </div>
 
@@ -286,6 +312,76 @@
       [loading]="saving"
       (onClick)="guardar()"
     />
+  </ng-template>
+</p-dialog>
+
+<!-- ── DIALOG IMPORTACIÓN MASIVA ─────────────────────────── -->
+<p-dialog
+  [(visible)]="importDialogVisible"
+  header="Revisar productos a importar"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="import-dialog"
+  [style]="{ width: '95vw', maxWidth: '1100px' }"
+  (onHide)="cerrarImportDialog()"
+>
+  <p class="import-hint">
+    Revisa y corrige los datos antes de guardar. Las filas en rojo tienen algo pendiente
+    (nombre y precio de venta son obligatorios) y no se importarán.
+  </p>
+
+  <div class="import-table-wrap">
+    <table class="import-table">
+      <thead>
+        <tr>
+          <th style="min-width:180px">Nombre</th>
+          <th style="min-width:140px">Código de barras</th>
+          <th style="min-width:160px">Categoría</th>
+          <th style="width:110px">P. Compra</th>
+          <th style="width:110px">P. Venta</th>
+          <th style="width:90px">Stock</th>
+          <th style="width:90px">Stock mín.</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of importRows; let i = index" [class.row-error]="!filaImportValida(f)">
+          <td><input type="text" [(ngModel)]="f.nombre" placeholder="Nombre del producto" /></td>
+          <td><input type="text" [(ngModel)]="f.codigoBarras" placeholder="Opcional" /></td>
+          <td>
+            <select [(ngModel)]="f.categoriaId">
+              <option [ngValue]="null">Sin categoría</option>
+              <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nombre }}</option>
+            </select>
+          </td>
+          <td><input type="number" min="0" step="0.01" [(ngModel)]="f.precioCompra" /></td>
+          <td><input type="number" min="0" step="0.01" [(ngModel)]="f.precioVenta" /></td>
+          <td><input type="number" min="0" [(ngModel)]="f.stock" /></td>
+          <td><input type="number" min="0" [(ngModel)]="f.stockMinimo" /></td>
+          <td>
+            <button class="row-remove" (click)="quitarFilaImport(i)" pTooltip="Quitar fila">
+              <i class="pi pi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="btn-add-row" (click)="agregarFilaImport()">
+    <i class="pi pi-plus"></i> Agregar fila
+  </button>
+
+  <ng-template pTemplate="footer">
+    <span class="import-summary">
+      {{ cantidadFilasValidas }} de {{ importRows.length }} filas listas para guardar
+    </span>
+    <button class="foot-btn cancel" (click)="cerrarImportDialog()">Cancelar</button>
+    <button class="foot-btn primary" [disabled]="importing || cantidadFilasValidas === 0" (click)="guardarImportacion()">
+      <i class="pi" [class.pi-spin]="importing" [class.pi-spinner]="importing" [class.pi-check]="!importing"></i>
+      {{ importing ? 'Guardando...' : 'Guardar ' + cantidadFilasValidas + ' producto(s)' }}
+    </button>
   </ng-template>
 </p-dialog>
 

@@ -23,26 +23,28 @@
       <div class="nav-section">
         <span class="nav-section-label">Principal</span>
         <a class="nav-item" routerLink="/dashboard"   routerLinkActive="active" pRipple><i class="pi pi-home"></i><span>Dashboard</span></a>
+        <a class="nav-item" routerLink="/caja"        routerLinkActive="active" pRipple><i class="pi pi-calculator"></i><span>Caja</span></a>
         <a class="nav-item" routerLink="/ventas"      routerLinkActive="active" pRipple><i class="pi pi-receipt"></i><span>Ventas</span></a>
       </div>
 
-      <div class="nav-section">
+      <div class="nav-section"   >
         <span class="nav-section-label">Catálogo</span>
         <a class="nav-item" routerLink="/productos"   routerLinkActive="active" pRipple><i class="pi pi-box"></i><span>Productos</span></a>
         <a class="nav-item" routerLink="/categorias"  routerLinkActive="active" pRipple><i class="pi pi-tags"></i><span>Categorías</span></a>
-        <a class="nav-item" routerLink="/proveedores" routerLinkActive="active" pRipple><i class="pi pi-truck"></i><span>Proveedores</span></a>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/proveedores" routerLinkActive="active" pRipple><i class="pi pi-truck"></i><span>Proveedores</span></a>
       </div>
 
       <div class="nav-section">
-        <span class="nav-section-label">Finanzas</span>
-        <a class="nav-item" routerLink="/gastos"      routerLinkActive="active" pRipple><i class="pi pi-wallet"></i><span>Gastos</span></a>
-        <a class="nav-item" routerLink="/movimientos" routerLinkActive="active" pRipple><i class="pi pi-arrow-right-arrow-left"></i><span>Movimientos</span></a>
+        <span class="nav-section-label" *ngIf="isAdmin">Finanzas</span>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/gastos"      routerLinkActive="active" pRipple><i class="pi pi-wallet"></i><span>Gastos</span></a>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/movimientos" routerLinkActive="active" pRipple><i class="pi pi-arrow-right-arrow-left"></i><span>Movimientos</span></a>
+        <a class="nav-item" *ngIf="isAdmin" routerLink="/reportes"    routerLinkActive="active" pRipple><i class="pi pi-chart-bar"></i><span>Reportes</span></a>
       </div>
 
-      <div class="nav-section" *ngIf="isAdmin">
-        <span class="nav-section-label">Administración</span>
-        <a class="nav-item" routerLink="/usuarios"    routerLinkActive="active" pRipple><i class="pi pi-users"></i><span>Usuarios</span></a>
-        <a class="nav-item" routerLink="/empresas"    routerLinkActive="active" pRipple><i class="pi pi-building"></i><span>Empresas</span></a>
+      <div class="nav-section" >
+        <span class="nav-section-label" *ngIf="isAdmin || userRol==='PROGRAMADOR'">Administración</span>
+        <a class="nav-item"  *ngIf="isAdmin || userRol==='PROGRAMADOR'"routerLink="/usuarios"    routerLinkActive="active" pRipple><i class="pi pi-users"></i><span>Usuarios</span></a>
+        <a class="nav-item" *ngIf="userRol==='PROGRAMADOR'" routerLink="/empresas"    routerLinkActive="active" pRipple><i class="pi pi-building"></i><span>Empresas</span></a>
       </div>
     </nav>
 
@@ -77,10 +79,26 @@
           <span>Nueva venta</span>
         </button>
 
-        <button class="nav-btn" pRipple pTooltip="Stock bajo" tooltipPosition="bottom">
+        <button class="nav-btn" pRipple pTooltip="Stock bajo" tooltipPosition="bottom" (click)="stockPanel.toggle($event)">
           <i class="pi pi-bell"></i>
           <span class="badge" *ngIf="stockBajoCount > 0">{{ stockBajoCount }}</span>
         </button>
+
+        <p-popover #stockPanel styleClass="stock-bajo-panel">
+          <div class="sb-header">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>Stock bajo</span>
+          </div>
+          <div class="sb-list" *ngIf="productosStockBajo.length > 0; else sbEmpty">
+            <a class="sb-item" *ngFor="let p of productosStockBajo" routerLink="/productos" (click)="stockPanel.hide()">
+              <span class="sb-nombre">{{ p.nombre }}</span>
+              <span class="sb-stock">{{ p.stock }} / {{ p.stockMinimo }}</span>
+            </a>
+          </div>
+          <ng-template #sbEmpty>
+            <div class="sb-empty">Sin productos con stock bajo</div>
+          </ng-template>
+        </p-popover>
 
         <button class="nav-btn profile-btn" (click)="menu.toggle($event)" pRipple>
           <p-avatar [label]="userInitial" styleClass="nav-avatar" shape="circle" />
@@ -88,7 +106,7 @@
           <i class="pi pi-chevron-down"></i>
         </button>
 
-        <p-menu #menu [model]="profileMenu" [popup]="true" styleClass="profile-menu" />
+        <p-menu #menu [model]="profileMenu" [popup]="true" appendTo="body" styleClass="profile-menu" />
       </div>
     </header>
 
@@ -138,14 +156,25 @@
       <div class="search-wrap">
         <div class="search-field">
           <i class="pi pi-search"></i>
-          <input type="text" [(ngModel)]="busqueda" (ngModelChange)="buscarProductos()"
-            placeholder="Buscar producto por nombre..." autocomplete="off" class="search-input" />
+     <input type="text" [(ngModel)]="busqueda" (ngModelChange)="buscarProductos()"
+          placeholder="Buscar por nombre o escanea el código..." autocomplete="off" class="search-input"
+          (keydown.arrowdown)="moverHighlight(1)"
+          (keydown.arrowup)="moverHighlight(-1)"
+          (keydown.escape)="limpiarBusqueda()"
+          (keydown.enter)="onBusquedaEnter()" />
+
           <button class="search-clear" *ngIf="busqueda" (click)="limpiarBusqueda()">
             <i class="pi pi-times"></i>
           </button>
+          <button class="search-scan-btn" (click)="abrirScanner()" pTooltip="Escanear con la cámara" tooltipPosition="top">
+            <i class="pi pi-camera"></i>
+          </button>
         </div>
         <div class="search-results" *ngIf="resultadosBusqueda.length > 0">
-          <div class="search-item" *ngFor="let p of resultadosBusqueda" (click)="agregarAlCarrito(p)">
+          <div class="search-item" *ngFor="let p of resultadosBusqueda; let i = index"
+  [class.highlighted]="i === highlightedIndex"
+  (click)="agregarAlCarrito(p)">
+
             <div class="si-info">
               <span class="si-nombre">{{ p.nombre }}</span>
               <span class="si-stock" [class.low]="p.stock <= (p.stockMinimo ?? 0)">Stock: {{ p.stock }}</span>
@@ -298,5 +327,22 @@
   </div>
 
 </div><!-- /drawer-panel -->
+
+<!-- ══ MODAL ESCÁNER DE CÓDIGO DE BARRAS ══════════════════ -->
+<div class="scanner-overlay" [class.open]="scannerVisible" (click)="cerrarScanner()"></div>
+<div class="scanner-modal" [class.open]="scannerVisible">
+  <div class="scanner-header">
+    <span><i class="pi pi-camera"></i> Escanear código de barras</span>
+    <button class="dp-close" (click)="cerrarScanner()"><i class="pi pi-times"></i></button>
+  </div>
+  <div class="scanner-body">
+    <video #scannerVideo class="scanner-video" muted playsinline></video>
+    <div class="scanner-frame"></div>
+    <div class="scanner-error" *ngIf="scannerError">
+      <i class="pi pi-exclamation-triangle"></i> {{ scannerError }}
+    </div>
+    <p class="scanner-hint" *ngIf="!scannerError">Apunta la cámara al código de barras del producto</p>
+  </div>
+</div>
 
 <p-toast position="top-right" />

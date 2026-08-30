@@ -16,34 +16,31 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([authInterceptor])
-    ),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     providePrimeNG({
       theme: {
         preset: Aura,
         options: {
           // Modo oscuro basado en la clase del HTML
-          darkModeSelector: '.dark-mode',
+          darkModeSelector: false,
           cssLayer: {
-            name:  'primeng',
-            order: 'tailwind-base, primeng, tailwind-utilities'
-          }
-        }
+            name: 'primeng',
+            order: 'tailwind-base, primeng, tailwind-utilities',
+          },
+        },
       },
       // Traducciones al español
       translation: {
-        accept:       'Aceptar',
-        reject:       'Cancelar',
-        cancel:       'Cancelar',
+        accept: 'Aceptar',
+        reject: 'Cancelar',
+        cancel: 'Cancelar',
         //close:        'Cerrar',
-        clear:        'Limpiar',
-        apply:        'Aplicar',
+        clear: 'Limpiar',
+        apply: 'Aplicar',
         //search:       'Buscar',
         //noResultsMsg: 'Sin resultados',
-        emptyMessage: 'Sin datos'
-      }
-    })
-  ]
+        emptyMessage: 'Sin datos',
+      },
+    }),
+  ],
 };

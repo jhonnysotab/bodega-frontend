@@ -1,0 +1,245 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Reportes</h2>
+      <p>Gastos, arqueos de caja e inventario</p>
+    </div>
+  </div>
+
+  <!-- Filtro de fechas -->
+  <div class="filtro-fechas">
+    <div class="fecha-field">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="desde" (change)="aplicarFiltro()" />
+    </div>
+    <div class="fecha-field">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="hasta" (change)="aplicarFiltro()" />
+    </div>
+    <span class="filtro-nota" *ngIf="tabActivo === 'inventario'">El stock bajo no usa este rango, es el estado actual.</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-row">
+    <button class="tab-chip" [class.active]="tabActivo === 'gastos'" (click)="cambiarTab('gastos')">
+      <i class="pi pi-wallet"></i> Gastos
+    </button>
+    <button class="tab-chip" [class.active]="tabActivo === 'caja'" (click)="cambiarTab('caja')">
+      <i class="pi pi-calculator"></i> Caja
+    </button>
+    <button class="tab-chip" [class.active]="tabActivo === 'inventario'" (click)="cambiarTab('inventario')">
+      <i class="pi pi-box"></i> Inventario
+    </button>
+  </div>
+
+  <!-- ── GASTOS ─────────────────────────────────────────── -->
+  <ng-container *ngIf="tabActivo === 'gastos'">
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <span class="kpi-label">Total gastado</span>
+        <span class="kpi-val warn">S/ {{ totalGastos | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-mini">
+        <span class="kpi-label">Cantidad de gastos</span>
+        <span class="kpi-val">{{ gastos.length }}</span>
+      </div>
+      <div class="export-actions">
+        <button class="btn-export excel" (click)="exportarGastos('excel')" [disabled]="gastos.length === 0">
+          <i class="pi pi-file-excel"></i> Excel
+        </button>
+        <button class="btn-export pdf" (click)="exportarGastos('pdf')" [disabled]="gastos.length === 0">
+          <i class="pi pi-file-pdf"></i> PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <p-table [value]="gastos" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th style="text-align:right">Monto</th>
+            <th>Usuario</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-g>
+          <tr>
+            <td>{{ g.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ g.descripcion }}</td>
+            <td style="text-align:right">S/ {{ g.monto | number:'1.2-2' }}</td>
+            <td>{{ g.usuarioNombre }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="4"><div class="empty-state"><i class="pi pi-wallet"></i><span>Sin gastos en el rango seleccionado</span></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </ng-container>
+
+  <!-- ── CAJA ───────────────────────────────────────────── -->
+  <ng-container *ngIf="tabActivo === 'caja'">
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <span class="kpi-label">Turnos en el rango</span>
+        <span class="kpi-val">{{ cajas.length }}</span>
+      </div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-mini">
+        <span class="kpi-label">Turnos con diferencia</span>
+        <span class="kpi-val" [class.warn]="cajasConDiferencia > 0">{{ cajasConDiferencia }}</span>
+      </div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-mini">
+        <span class="kpi-label">Diferencia acumulada</span>
+        <span class="kpi-val" [class.ok]="totalDiferenciaCaja === 0" [class.warn]="totalDiferenciaCaja !== 0">
+          S/ {{ totalDiferenciaCaja | number:'1.2-2' }}
+        </span>
+      </div>
+      <div class="export-actions">
+        <button class="btn-export excel" (click)="exportarCajas('excel')" [disabled]="cajas.length === 0">
+          <i class="pi pi-file-excel"></i> Excel
+        </button>
+        <button class="btn-export pdf" (click)="exportarCajas('pdf')" [disabled]="cajas.length === 0">
+          <i class="pi pi-file-pdf"></i> PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <p-table [value]="cajas" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Apertura</th>
+            <th>Cierre</th>
+            <th>Estado</th>
+            <th>Cajero</th>
+            <th style="text-align:right">Inicial</th>
+            <th style="text-align:right">Esperado</th>
+            <th style="text-align:right">Contado</th>
+            <th style="text-align:right">Diferencia</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-c>
+          <tr>
+            <td>{{ c.fechaApertura | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ c.fechaCierre ? (c.fechaCierre | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
+            <td>
+              <span class="estado-badge" [class.abierta]="c.estado === 'ABIERTA'">{{ c.estado }}</span>
+            </td>
+            <td>{{ c.usuarioAperturaNombre }}</td>
+            <td style="text-align:right">S/ {{ c.montoInicial | number:'1.2-2' }}</td>
+            <td style="text-align:right">{{ c.montoFinalSistema != null ? ('S/ ' + (c.montoFinalSistema | number:'1.2-2')) : '—' }}</td>
+            <td style="text-align:right">{{ c.montoFinalDeclarado != null ? ('S/ ' + (c.montoFinalDeclarado | number:'1.2-2')) : '—' }}</td>
+            <td style="text-align:right">
+              <span class="dif-badge" *ngIf="c.diferencia != null" [class.ok]="c.diferencia === 0" [class.warn]="c.diferencia !== 0">
+                {{ c.diferencia > 0 ? '+' : '' }}S/ {{ c.diferencia | number:'1.2-2' }}
+              </span>
+              <span *ngIf="c.diferencia == null">—</span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="8"><div class="empty-state"><i class="pi pi-calculator"></i><span>Sin turnos de caja en el rango seleccionado</span></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </ng-container>
+
+  <!-- ── INVENTARIO ─────────────────────────────────────── -->
+  <ng-container *ngIf="tabActivo === 'inventario'">
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <span class="kpi-label">Ingresos</span>
+        <span class="kpi-val ok">{{ cantIngresos }}</span>
+      </div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-mini">
+        <span class="kpi-label">Ajustes</span>
+        <span class="kpi-val">{{ cantAjustes }}</span>
+      </div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-mini">
+        <span class="kpi-label">Ventas (salidas)</span>
+        <span class="kpi-val">{{ cantVentas }}</span>
+      </div>
+      <div class="export-actions">
+        <button class="btn-export excel" (click)="exportarMovimientos('excel')" [disabled]="movimientosFiltrados.length === 0">
+          <i class="pi pi-file-excel"></i> Excel
+        </button>
+        <button class="btn-export pdf" (click)="exportarMovimientos('pdf')" [disabled]="movimientosFiltrados.length === 0">
+          <i class="pi pi-file-pdf"></i> PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-title"><i class="pi pi-arrow-right-arrow-left"></i> Movimientos de stock</div>
+      <p-table [value]="movimientosFiltrados" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th style="text-align:center">Tipo</th>
+            <th style="text-align:center">Cantidad</th>
+            <th style="text-align:center">Stock nuevo</th>
+            <th>Usuario</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-m>
+          <tr>
+            <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ m.productoNombre }}</td>
+            <td style="text-align:center">{{ m.tipoMovimiento }}</td>
+            <td style="text-align:center">{{ m.tipoMovimiento === 'INGRESO' ? '+' : m.tipoMovimiento === 'AJUSTE' ? '~' : '-' }}{{ m.cantidad }}</td>
+            <td style="text-align:center">{{ m.stockNuevo }}</td>
+            <td>{{ m.usuarioNombre }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="6"><div class="empty-state"><i class="pi pi-arrow-right-arrow-left"></i><span>Sin movimientos en el rango seleccionado</span></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <div class="table-card">
+      <div class="table-title">
+        <span><i class="pi pi-exclamation-triangle"></i> Productos con stock bajo</span>
+        <div class="export-actions inline">
+          <button class="btn-export excel" (click)="exportarStockBajo('excel')" [disabled]="stockBajo.length === 0">
+            <i class="pi pi-file-excel"></i> Excel
+          </button>
+          <button class="btn-export pdf" (click)="exportarStockBajo('pdf')" [disabled]="stockBajo.length === 0">
+            <i class="pi pi-file-pdf"></i> PDF
+          </button>
+        </div>
+      </div>
+      <p-table [value]="stockBajo" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Producto</th>
+            <th style="text-align:center">Stock actual</th>
+            <th style="text-align:center">Stock mínimo</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-p>
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td style="text-align:center" class="warn">{{ p.stock }}</td>
+            <td style="text-align:center">{{ p.stockMinimo }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="3"><div class="empty-state"><i class="pi pi-check-circle"></i><span>Todo el stock está en buen nivel</span></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </ng-container>
+
+</div>
+
+<p-toast position="top-right" />

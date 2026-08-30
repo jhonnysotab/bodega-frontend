@@ -1,0 +1,266 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Movimientos de Stock</h2>
+      <p>Ingresos, salidas y ajustes de inventario</p>
+    </div>
+    <p-button label="Nuevo movimiento" icon="pi pi-plus" styleClass="btn-primary" (onClick)="abrirDrawer()" />
+  </div>
+
+  <!-- Filtros tipo -->
+  <div class="filter-row">
+    <button class="tipo-chip all" [class.active]="filtroTipo === null" (click)="filtrar(null)">
+      <i class="pi pi-list"></i> Todos
+    </button>
+    <button class="tipo-chip ingreso" [class.active]="filtroTipo === 'INGRESO'" (click)="filtrar('INGRESO')">
+      <i class="pi pi-arrow-down-left"></i> Ingresos
+    </button>
+    <button class="tipo-chip ajuste" [class.active]="filtroTipo === 'AJUSTE'" (click)="filtrar('AJUSTE')">
+      <i class="pi pi-sliders-h"></i> Ajustes
+    </button>
+
+    <div class="filter-spacer"></div>
+
+    <!-- Filtro por producto -->
+    <p-select
+      [options]="productos"
+      [(ngModel)]="filtroProductoId"
+      optionLabel="nombre"
+      optionValue="id"
+      placeholder="Filtrar por producto"
+      styleClass="filter-select"
+      [showClear]="true"
+      (onChange)="aplicarFiltros()"
+    />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="movimientosFiltrados"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="12"
+      [rowsPerPageOptions]="[10,25,50]"
+      dataKey="id"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:140px">Fecha</th>
+          <th>Producto</th>
+          <th>Proveedor</th>
+          <th style="text-align:center">Tipo</th>
+          <th style="text-align:center">Cantidad</th>
+          <th style="text-align:center">Stock anterior</th>
+          <th style="text-align:center">Stock nuevo</th>
+          <th>Nota</th>
+          <th>Usuario</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-m>
+        <tr>
+          <!-- Fecha -->
+          <td>
+            <div class="fecha-cell">
+              <span class="fecha-dia">{{ m.fecha | date:'dd/MM/yyyy' }}</span>
+              <span class="fecha-hora">{{ m.fecha | date:'HH:mm' }}</span>
+            </div>
+          </td>
+
+          <!-- Producto -->
+          <td>
+            <span class="producto-nombre">{{ m.productoNombre }}</span>
+          </td>
+
+          <!-- Proveedor -->
+          <td>
+            <span class="prov-text" *ngIf="m.proveedorNombre">
+              <i class="pi pi-truck"></i> {{ m.proveedorNombre }}
+            </span>
+            <span class="no-prov" *ngIf="!m.proveedorNombre">—</span>
+          </td>
+
+          <!-- Tipo -->
+          <td style="text-align:center">
+            <div class="tipo-badge" [class]="getTipoClass(m.tipoMovimiento)">
+              <i class="pi" [class]="getTipoIcon(m.tipoMovimiento)"></i>
+              {{ m.tipoMovimiento }}
+            </div>
+          </td>
+
+          <!-- Cantidad -->
+          <td style="text-align:center">
+            <span class="cantidad-badge" [class]="getTipoClass(m.tipoMovimiento)">
+              {{ m.tipoMovimiento === 'INGRESO' ? '+' : m.tipoMovimiento === 'AJUSTE' ? '~' : '-' }}{{ m.cantidad }}
+            </span>
+          </td>
+
+          <!-- Stock anterior -->
+          <td style="text-align:center">
+            <span class="stock-val muted">{{ m.stockAnterior }}</span>
+          </td>
+
+          <!-- Stock nuevo -->
+          <td style="text-align:center">
+            <div class="stock-nuevo-wrap">
+              <span class="stock-val" [class.ok]="m.stockNuevo > m.stockAnterior" [class.down]="m.stockNuevo < m.stockAnterior">
+                {{ m.stockNuevo }}
+              </span>
+              <i class="pi pi-arrow-up stock-arrow up"   *ngIf="m.stockNuevo > m.stockAnterior"></i>
+              <i class="pi pi-arrow-down stock-arrow down" *ngIf="m.stockNuevo < m.stockAnterior"></i>
+              <i class="pi pi-minus stock-arrow eq"      *ngIf="m.stockNuevo === m.stockAnterior"></i>
+            </div>
+          </td>
+
+          <!-- Nota -->
+          <td><span class="nota-text">{{ m.nota || '—' }}</span></td>
+
+          <!-- Usuario -->
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar">{{ m.usuarioNombre?.charAt(0) }}</div>
+              <span class="user-name">{{ m.usuarioNombre }}</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="9">
+          <div class="empty-state">
+            <i class="pi pi-arrow-right-arrow-left"></i>
+            <span>Sin movimientos registrados</span>
+          </div>
+        </td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ══ DRAWER NUEVO MOVIMIENTO ══════════════════════════ -->
+<div class="drawer-overlay" [class.open]="drawerVisible" (click)="cerrarDrawer()"></div>
+
+<div class="drawer-panel" [class.open]="drawerVisible">
+
+  <div class="dp-header">
+    <div class="dp-title">
+      <i class="pi pi-arrow-right-arrow-left"></i>
+      Nuevo movimiento
+    </div>
+    <button class="dp-close" (click)="cerrarDrawer()"><i class="pi pi-times"></i></button>
+  </div>
+
+  <div class="dp-body" [formGroup]="movForm">
+
+    <!-- Tipo de movimiento -->
+    <div class="field-group">
+      <label>Tipo de movimiento</label>
+      <div class="tipo-selector">
+        <button class="tipo-opt ingreso" [class.selected]="movForm.get('tipoMovimiento')?.value === 'INGRESO'"
+          (click)="seleccionarTipo('INGRESO')">
+          <i class="pi pi-arrow-down-left"></i>
+          <span>Ingreso</span>
+          <small>Compra / reposición</small>
+        </button>
+        <button class="tipo-opt ajuste" [class.selected]="movForm.get('tipoMovimiento')?.value === 'AJUSTE'"
+          (click)="seleccionarTipo('AJUSTE')">
+          <i class="pi pi-sliders-h"></i>
+          <span>Ajuste</span>
+          <small>Corrección de inventario</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- Producto -->
+    <div class="field-group">
+      <label>Producto</label>
+      <p-select
+        formControlName="productoId"
+        [options]="productos"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Seleccionar producto"
+        styleClass="w-full"
+        [filter]="true"
+        filterPlaceholder="Buscar producto..."
+        [showClear]="true"
+        (onChange)="onProductoChange($event)"
+      />
+      <!-- Stock actual del producto seleccionado -->
+      <div class="stock-actual" *ngIf="productoSeleccionado">
+        <i class="pi pi-box"></i>
+        Stock actual: <strong>{{ productoSeleccionado.stock }}</strong> unidades
+      </div>
+      <small class="field-error" *ngIf="hasError('productoId')">Selecciona un producto</small>
+    </div>
+
+    <!-- Cantidad -->
+    <div class="field-group">
+      <label>Cantidad</label>
+      <div class="cantidad-wrap">
+        <button class="qty-btn" (click)="decrementarCantidad()"><i class="pi pi-minus"></i></button>
+        <input type="number" formControlName="cantidad" min="1" class="cantidad-input"
+          [class.is-error]="hasError('cantidad')" />
+        <button class="qty-btn" (click)="incrementarCantidad()"><i class="pi pi-plus"></i></button>
+      </div>
+      <small class="field-error" *ngIf="hasError('cantidad')">Ingresa una cantidad válida</small>
+
+      <!-- Preview stock resultante -->
+      <div class="stock-preview" *ngIf="productoSeleccionado && movForm.get('cantidad')?.value > 0">
+        <span class="preview-label">Stock resultante:</span>
+        <span class="preview-val" [class.ok]="stockResultante >= 0" [class.warn]="stockResultante < 0">
+          {{ stockResultante }} unidades
+        </span>
+        <span class="preview-arrow">
+          <i class="pi" [class.pi-arrow-up]="esIngreso" [class.pi-sliders-h]="!esIngreso"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- Proveedor (solo INGRESO) -->
+    <div class="field-group" *ngIf="esIngreso">
+      <label>Proveedor <span class="opt">opcional</span></label>
+      <p-select
+        formControlName="proveedorId"
+        [options]="proveedores"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="¿De qué proveedor?"
+        styleClass="w-full"
+        [showClear]="true"
+        [filter]="true"
+        filterPlaceholder="Buscar..."
+      />
+    </div>
+
+    <!-- Nota -->
+    <div class="field-group">
+      <label>Nota <span class="opt">opcional</span></label>
+      <div class="input-icon-wrap">
+        <i class="pi pi-file-edit"></i>
+        <input type="text" formControlName="nota" placeholder="Ej: Compra semanal, ajuste por merma..." />
+      </div>
+    </div>
+
+    <p-message *ngIf="serverError" severity="error" [text]="serverError" styleClass="w-full" />
+
+  </div>
+
+  <div class="dp-footer">
+    <button class="foot-btn cancel" (click)="cerrarDrawer()">Cancelar</button>
+    <button class="foot-btn primary" [class.ingreso]="esIngreso" [class.ajuste]="!esIngreso"
+      [disabled]="saving" (click)="guardar()">
+      <i class="pi" [class.pi-spin]="saving" [class.pi-spinner]="saving"
+        [class.pi-check]="!saving"></i>
+      {{ saving ? 'Guardando...' : 'Registrar movimiento' }}
+    </button>
+  </div>
+
+</div>
+
+<p-toast position="top-right" />

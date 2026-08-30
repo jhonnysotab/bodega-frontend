@@ -1,0 +1,94 @@
+* { box-sizing: border-box; }
+
+.page { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 2px; }
+  p  { font-size: 0.82rem; color: var(--text-muted); }
+}
+
+// ── Filtro de fechas ────────────────────────────────────
+.filtro-fechas {
+  display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.fecha-field {
+  display: flex; flex-direction: column; gap: 5px;
+  label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  input {
+    background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text-primary); font-family: var(--font-body); font-size: 0.85rem;
+    padding: 8px 10px; outline: none;
+    &:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  }
+}
+.filtro-nota { font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-left: auto; }
+
+// ── Tabs ────────────────────────────────────────────────
+.tabs-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text-secondary); cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+  .pi { font-size: 0.8rem; }
+  &:hover { border-color: var(--accent); color: var(--text-primary); }
+  &.active { background: var(--accent-glow); border-color: rgba(99,102,241,0.35); color: var(--accent); }
+}
+
+// ── KPI row ─────────────────────────────────────────────
+.kpi-row {
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+}
+.kpi-mini { display: flex; flex-direction: column; gap: 3px; }
+.kpi-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.kpi-val {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-primary);
+  &.ok   { color: var(--ingreso); }
+  &.warn { color: var(--error); }
+}
+.kpi-divider { width: 1px; height: 36px; background: var(--border); }
+
+.export-actions {
+  display: flex; gap: 8px; margin-left: auto;
+  &.inline { margin-left: 0; }
+}
+.btn-export {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+  background: transparent; font-family: var(--font-display); font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &.excel { color: var(--ingreso); &:hover:not(:disabled) { background: var(--ingreso-glow); border-color: rgba(45,189,122,0.35); } }
+  &.pdf   { color: var(--error);   &:hover:not(:disabled) { background: var(--error-glow); border-color: rgba(220,38,38,0.35); } }
+}
+
+// ── Tabla ───────────────────────────────────────────────
+.table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-title {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
+  .pi { color: var(--accent); }
+}
+
+.estado-badge {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 2px 9px; border-radius: 20px; background: rgba(0,0,0,0.04); color: var(--text-muted);
+  &.abierta { background: var(--ingreso-glow); color: var(--ingreso); }
+}
+
+.dif-badge {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.8rem;
+  padding: 2px 8px; border-radius: 20px;
+  &.ok   { color: var(--ingreso); background: var(--ingreso-glow); }
+  &.warn { color: var(--error);   background: var(--error-glow); }
+}
+
+td.warn { color: var(--error); font-weight: 700; }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 3rem; color: var(--text-muted); font-size: 0.875rem; .pi { font-size: 2rem; } }

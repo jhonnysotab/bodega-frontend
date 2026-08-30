@@ -1,0 +1,181 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Caja</h2>
+      <p>Apertura, cierre y arqueo del turno</p>
+    </div>
+  </div>
+
+  <!-- ── SIN CAJA ABIERTA: FORM DE APERTURA ─────────────── -->
+  <div class="apertura-card" *ngIf="!loading && !cajaActual">
+    <div class="apertura-icon"><i class="pi pi-lock"></i></div>
+    <h3>No hay una caja abierta</h3>
+    <p>Registra el efectivo con el que arrancas el turno para poder empezar a vender.</p>
+
+    <div class="apertura-form">
+      <div class="field-group">
+        <label>Monto inicial en efectivo</label>
+        <div class="money-input">
+          <span class="currency">S/</span>
+          <input type="number" [(ngModel)]="montoInicial" placeholder="0.00" min="0" step="0.50" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Nota <span class="opt">opcional</span></label>
+        <input type="text" [(ngModel)]="notaApertura" placeholder="Ej: Turno mañana" class="text-input" />
+      </div>
+
+      <p-message *ngIf="serverErrorApertura" severity="error" [text]="serverErrorApertura" styleClass="w-full" />
+
+      <button class="btn-abrir" [disabled]="abriendo" (click)="abrirCaja()">
+        <i class="pi" [class.pi-spin]="abriendo" [class.pi-spinner]="abriendo" [class.pi-lock-open]="!abriendo"></i>
+        {{ abriendo ? 'Abriendo...' : 'Abrir caja' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── CAJA ABIERTA: RESUMEN ───────────────────────────── -->
+  <ng-container *ngIf="!loading && cajaActual">
+    <div class="caja-abierta-card">
+      <div class="cab-header">
+        <div class="cab-title">
+          <span class="cab-badge"><i class="pi pi-circle-fill"></i> Caja abierta</span>
+          <span class="cab-meta">
+            Abierta por <strong>{{ cajaActual.usuarioAperturaNombre }}</strong>
+            el {{ cajaActual.fechaApertura | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+        <button class="btn-cerrar" (click)="abrirDialogCierre()">
+          <i class="pi pi-lock"></i> Cerrar caja
+        </button>
+      </div>
+
+      <div class="cab-grid">
+        <div class="cab-stat">
+          <span class="cs-label">Monto inicial</span>
+          <span class="cs-val">S/ {{ cajaActual.montoInicial | number:'1.2-2' }}</span>
+        </div>
+        <div class="cab-stat">
+          <span class="cs-label">Ventas ({{ cajaActual.cantidadVentas }})</span>
+          <span class="cs-val accent">S/ {{ cajaActual.totalVentas | number:'1.2-2' }}</span>
+        </div>
+        <div class="cab-stat">
+          <span class="cs-label">Gastos del turno</span>
+          <span class="cs-val warn">S/ {{ cajaActual.totalGastos | number:'1.2-2' }}</span>
+        </div>
+        <div class="cab-stat highlight">
+          <span class="cs-label">Efectivo esperado</span>
+          <span class="cs-val">S/ {{ cajaActual.efectivoEsperado | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="cab-pagos">
+        <div class="pago-mini">
+          <i class="pi pi-money-bill"></i>
+          <span>Efectivo</span>
+          <strong>S/ {{ cajaActual.totalVentasEfectivo | number:'1.2-2' }}</strong>
+        </div>
+        <div class="pago-mini">
+          <i class="pi pi-mobile"></i>
+          <span>Yape</span>
+          <strong>S/ {{ cajaActual.totalVentasYape | number:'1.2-2' }}</strong>
+        </div>
+        <div class="pago-mini">
+          <i class="pi pi-mobile"></i>
+          <span>Plin</span>
+          <strong>S/ {{ cajaActual.totalVentasPlin | number:'1.2-2' }}</strong>
+        </div>
+        <div class="pago-mini">
+          <i class="pi pi-send"></i>
+          <span>Transferencia</span>
+          <strong>S/ {{ cajaActual.totalVentasTransferencia | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── HISTORIAL ───────────────────────────────────────── -->
+  <div class="table-card" *ngIf="historial.length > 0">
+    <div class="table-title"><i class="pi pi-history"></i> Últimos cierres</div>
+    <p-table [value]="historial" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Apertura</th>
+          <th>Cierre</th>
+          <th>Cajero</th>
+          <th style="text-align:center">Monto inicial</th>
+          <th style="text-align:center">Esperado</th>
+          <th style="text-align:center">Contado</th>
+          <th style="text-align:center">Diferencia</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-c>
+        <tr>
+          <td>{{ c.fechaApertura | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ c.fechaCierre | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ c.usuarioAperturaNombre }}</td>
+          <td style="text-align:center">S/ {{ c.montoInicial | number:'1.2-2' }}</td>
+          <td style="text-align:center">S/ {{ c.montoFinalSistema | number:'1.2-2' }}</td>
+          <td style="text-align:center">S/ {{ c.montoFinalDeclarado | number:'1.2-2' }}</td>
+          <td style="text-align:center">
+            <span class="dif-badge" [class.ok]="c.diferencia === 0" [class.warn]="c.diferencia !== 0">
+              {{ c.diferencia > 0 ? '+' : '' }}S/ {{ c.diferencia | number:'1.2-2' }}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── DIALOG CIERRE DE CAJA ─────────────────────────────── -->
+<p-dialog
+  [(visible)]="cierreDialogVisible"
+  header="Cerrar caja"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="cierre-dialog"
+  [style]="{ width: '440px' }"
+>
+  <div class="cierre-resumen" *ngIf="cajaActual">
+    <div class="cr-row"><span>Monto inicial</span><span>S/ {{ cajaActual.montoInicial | number:'1.2-2' }}</span></div>
+    <div class="cr-row"><span>Ventas en efectivo</span><span>S/ {{ cajaActual.totalVentasEfectivo | number:'1.2-2' }}</span></div>
+    <div class="cr-row"><span>Gastos del turno</span><span>- S/ {{ cajaActual.totalGastos | number:'1.2-2' }}</span></div>
+    <div class="cr-row total"><span>Efectivo esperado</span><span>S/ {{ cajaActual.efectivoEsperado | number:'1.2-2' }}</span></div>
+  </div>
+
+  <div class="field-group">
+    <label>Monto contado en caja</label>
+    <div class="money-input">
+      <span class="currency">S/</span>
+      <input type="number" [(ngModel)]="montoFinalDeclarado" placeholder="0.00" min="0" step="0.50" />
+    </div>
+  </div>
+
+  <div class="dif-preview" *ngIf="diferenciaPreview !== null">
+    <span *ngIf="diferenciaPreview === 0" class="ok">Cuadra exacto</span>
+    <span *ngIf="diferenciaPreview > 0" class="ok">Sobran S/ {{ diferenciaPreview | number:'1.2-2' }}</span>
+    <span *ngIf="diferenciaPreview < 0" class="warn">Faltan S/ {{ -diferenciaPreview | number:'1.2-2' }}</span>
+  </div>
+
+  <div class="field-group">
+    <label>Nota <span class="opt">opcional</span></label>
+    <input type="text" [(ngModel)]="notaCierre" placeholder="Ej: Falta por vuelto mal dado..." class="text-input" />
+  </div>
+
+  <p-message *ngIf="serverErrorCierre" severity="error" [text]="serverErrorCierre" styleClass="w-full" />
+
+  <ng-template pTemplate="footer">
+    <button class="foot-btn cancel" (click)="cerrarDialogCierre()">Cancelar</button>
+    <button class="foot-btn primary" [disabled]="cerrando" (click)="confirmarCierre()">
+      <i class="pi" [class.pi-spin]="cerrando" [class.pi-spinner]="cerrando" [class.pi-check]="!cerrando"></i>
+      {{ cerrando ? 'Cerrando...' : 'Confirmar cierre' }}
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-toast position="top-right" />

@@ -1,20 +1,4 @@
-:host {
-  --accent:        #2dbd7a;
-  --accent-glow:   rgba(45,189,122,0.12);
-  --bg-card:       #111518;
-  --bg-drawer:     #0d1117;
-  --border:        #1a2028;
-  --text-primary:  #eef1f3;
-  --text-secondary:#7a8a96;
-  --text-muted:    #3a4a58;
-  --error:         #f05454;
-  --warning:       #f59e0b;
-  --font-display:  'Syne', sans-serif;
-  --font-body:     'DM Sans', sans-serif;
-  --radius:        12px;
-  --radius-sm:     8px;
-  --drawer-w:      460px;
-}
+
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -157,7 +141,7 @@
 
 .search-field {
   display: flex; align-items: center; gap: 8px;
-  background: #181d21; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
   padding: 0 12px; transition: border-color 0.2s, box-shadow 0.2s;
   &:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
   .pi-search { color: var(--text-muted); font-size: 0.9rem; flex-shrink: 0; }
@@ -179,9 +163,9 @@
 
 .search-results {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-  background: #181d21; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
   z-index: 10; max-height: 220px; overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-lg);
 }
 
 .search-item {
@@ -264,7 +248,7 @@
 .nota-wrap label { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .opt { text-transform: none; font-weight: 400; color: var(--text-muted); margin-left: 4px; }
 .nota-input {
-  background: #181d21; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
   color: var(--text-primary); font-family: var(--font-body); font-size: 0.875rem;
   padding: 9px 12px; outline: none; width: 100%;
   &::placeholder { color: var(--text-muted); }
@@ -296,7 +280,7 @@
 
 .money-input {
   display: flex; align-items: center; gap: 8px;
-  background: #181d21; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
   padding: 0 12px; transition: border-color 0.2s, box-shadow 0.2s;
   &:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
   .currency { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }

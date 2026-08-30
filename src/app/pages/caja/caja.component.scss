@@ -1,0 +1,172 @@
+* { box-sizing: border-box; }
+
+.page { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 2px; }
+  p  { font-size: 0.82rem; color: var(--text-muted); }
+}
+
+// ── APERTURA ────────────────────────────────────────────
+.apertura-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  max-width: 460px;
+  margin: 0 auto;
+  width: 100%;
+}
+.apertura-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent-glow); border: 2px solid rgba(99,102,241,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.5rem;
+  .pi { font-size: 1.6rem; color: var(--accent); }
+}
+.apertura-card h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.apertura-card > p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+.apertura-form {
+  display: flex; flex-direction: column; gap: 1rem; width: 100%; text-align: left;
+}
+
+.field-group {
+  display: flex; flex-direction: column; gap: 6px;
+  label { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .opt { text-transform: none; font-weight: 400; margin-left: 4px; }
+}
+
+.money-input {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 0 12px; transition: border-color 0.2s, box-shadow 0.2s;
+  &:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .currency { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
+  input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; padding: 10px 0; }
+}
+
+.text-input {
+  background: var(--bg-input); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 0.875rem;
+  padding: 9px 12px; outline: none; width: 100%;
+  &::placeholder { color: var(--text-muted); }
+  &:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+}
+
+.btn-abrir {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 16px; border-radius: var(--radius-sm); border: none;
+  background: var(--accent); color: #fff;
+  font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: var(--accent-hover); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── CAJA ABIERTA ────────────────────────────────────────
+.caja-abierta-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5rem;
+}
+.cab-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border);
+}
+.cab-title { display: flex; flex-direction: column; gap: 4px; }
+.cab-badge {
+  display: inline-flex; align-items: center; gap: 6px; width: fit-content;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ingreso);
+  .pi { font-size: 0.5rem; }
+}
+.cab-meta { font-size: 0.82rem; color: var(--text-muted); }
+
+.btn-cerrar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--error);
+  background: transparent; color: var(--error);
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: all 0.15s;
+  &:hover { background: var(--error-glow); }
+}
+
+.cab-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+}
+.cab-stat {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  &.highlight { background: var(--accent-glow); border-color: rgba(99,102,241,0.25); }
+}
+.cs-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.cs-val { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+  &.accent { color: var(--accent); }
+  &.warn   { color: var(--error); }
+}
+
+.cab-pagos {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.25rem;
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+}
+.pago-mini {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0.85rem 0.5rem; background: rgba(0,0,0,0.015); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  .pi { font-size: 1rem; color: var(--text-muted); margin-bottom: 2px; }
+  span { font-size: 0.72rem; color: var(--text-muted); }
+  strong { font-family: var(--font-display); font-size: 0.95rem; color: var(--text-primary); }
+}
+
+// ── HISTORIAL ───────────────────────────────────────────
+.table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-title {
+  display: flex; align-items: center; gap: 8px;
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
+  .pi { color: var(--accent); }
+}
+
+.dif-badge {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.82rem;
+  padding: 2px 8px; border-radius: 20px;
+  &.ok   { color: var(--ingreso); background: var(--ingreso-glow); }
+  &.warn { color: var(--error);   background: var(--error-glow); }
+}
+
+// ── DIALOG CIERRE ───────────────────────────────────────
+.cierre-resumen { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.1rem; }
+.cr-row {
+  display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-secondary);
+  &.total { font-weight: 700; color: var(--text-primary); padding-top: 6px; border-top: 1px dashed var(--border); margin-top: 4px;
+    span:last-child { color: var(--accent); font-family: var(--font-display); }
+  }
+}
+
+.dif-preview {
+  text-align: center; padding: 8px; margin: 0.75rem 0; border-radius: var(--radius-sm);
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+  .ok   { color: var(--ingreso); }
+  .warn { color: var(--error); }
+}
+
+::ng-deep {
+  .cierre-dialog {
+    .field-group { margin-bottom: 1rem; }
+  }
+}
+
+.foot-btn {
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  font-family: var(--font-display); font-size: 0.875rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s; border: 1.5px solid transparent;
+  &.cancel { background: transparent; border-color: var(--border); color: var(--text-secondary); &:hover { border-color: var(--text-secondary); color: var(--text-primary); } }
+  &.primary { background: var(--accent); color: #fff; border-color: var(--accent); &:hover { background: var(--accent-hover); } &:disabled { opacity: 0.5; cursor: not-allowed; } }
+}

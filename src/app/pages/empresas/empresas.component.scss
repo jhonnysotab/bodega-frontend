@@ -1,29 +1,12 @@
-:host {
-  --accent:        #2dbd7a;
-  --accent-glow:   rgba(45,189,122,0.12);
-  --bg-card:       #111518;
-  --border:        #1a2028;
-  --text-primary:  #eef1f3;
-  --text-secondary:#7a8a96;
-  --text-muted:    #3a4a58;
-  --error:         #f05454;
-  --warning:       #f59e0b;
-  --font-display:  'Syne', sans-serif;
-  --font-body:     'DM Sans', sans-serif;
-  --radius:        12px;
-  --radius-sm:     8px;
-}
-
-* { box-sizing: border-box; }
-
 .page { display: flex; flex-direction: column; gap: 1.5rem; }
-
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  
+  
 
   h2 {
     font-family: var(--font-display);
@@ -218,11 +201,11 @@
 
   // Dialog
   .empresa-dialog {
-    background: #111518 !important;
+    background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
     .p-dialog-header {
-      background: #111518 !important;
+      background: var(--bg-card) !important;
       border-bottom: 1px solid var(--border) !important;
       padding: 1.25rem 1.5rem !important;
       .p-dialog-title {
@@ -233,11 +216,11 @@
       }
     }
     .p-dialog-content {
-      background: #111518 !important;
+      background: var(--bg-card) !important;
       padding: 1.5rem !important;
     }
     .p-dialog-footer {
-      background: #111518 !important;
+      background: var(--bg-card) !important;
       border-top: 1px solid var(--border) !important;
       padding: 1rem 1.5rem !important;
       display: flex;
@@ -246,16 +229,16 @@
     }
   }
 
-  // DatePicker dark
+  // DatePicker
   .p-datepicker {
-    background: #181d21 !important;
+    background: var(--bg-input) !important;
     border-color: var(--border) !important;
     border-radius: var(--radius-sm) !important;
     &:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
     input { background: transparent !important; color: var(--text-primary) !important; border: none !important; }
   }
   .p-datepicker-panel {
-    background: #181d21 !important;
+    background: #fff !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-sm) !important;
     .p-datepicker-day-cell.p-datepicker-today .p-datepicker-day { background: var(--accent-glow) !important; color: var(--accent) !important; }
@@ -263,16 +246,19 @@
     .p-datepicker-day.p-highlight { background: var(--accent) !important; color: #051a0e !important; }
   }
 
-  // Select dark
+  // Select
   .p-select {
-    background: #181d21 !important;
+    background: var(--bg-input) !important;
     border-color: var(--border) !important;
     border-radius: var(--radius-sm) !important;
+    .p-select-label { color: var(--text-primary) !important; }
+    .p-select-placeholder { color: var(--text-muted) !important; }
     &:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
   }
   .p-select-overlay {
-    background: #181d21 !important;
+    background: #fff !important;
     border-color: var(--border) !important;
+    .p-select-option { color: var(--text-secondary) !important; }
     .p-select-option:hover { background: var(--accent-glow) !important; color: var(--accent) !important; }
     .p-select-option.p-highlight { background: var(--accent-glow) !important; color: var(--accent) !important; }
   }
